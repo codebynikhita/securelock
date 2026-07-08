@@ -96,20 +96,20 @@ def log_search(data):
         fake_prob, clone_prob, risk_score, classification
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ''', (
-        data['username'],
-        data.get('display_name', ''),
-        data['platform'],
-        data['account_age'],
-        data['network_count'],
-        data['following_count'],
-        data['posts_count'],
-        data.get('duplicate_posts', 0),
-        data.get('content_similarity', 0.0),
-        data.get('profile_picture', 1),
-        data['fake_probability'],
-        data['clone_probability'],
-        data['combined_risk_score'],
-        data['classification']
+        str(data.get('username', '')),
+        str(data.get('display_name', '')),
+        str(data.get('platform', '')),
+        float(data.get('account_age', 0.0)),
+        int(data.get('network_count', 0)),
+        int(data.get('following_count', 0)),
+        int(data.get('posts_count', 0)),
+        int(data.get('duplicate_posts', 0)),
+        float(data.get('content_similarity', 0.0)),
+        int(data.get('profile_picture', 1)),
+        float(data.get('fake_probability', 0.0)),
+        float(data.get('clone_probability', 0.0)),
+        float(data.get('combined_risk_score', 0.0)),
+        str(data.get('classification', 'Unknown'))
     ))
     conn.commit()
     conn.close()
