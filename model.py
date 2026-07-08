@@ -71,6 +71,13 @@ class SecureLockModel:
                 self.ensemble_clone = joblib.load(clone_path)
                 self.knn_fake = joblib.load(knn_fake_path)
                 self.knn_clone = joblib.load(knn_clone_path)
+
+                # Fix XGBoost cross-platform unpickling bug by restoring missing 'objective'
+                for ensemble in [self.ensemble_fake, self.ensemble_clone]:
+                    if hasattr(ensemble, 'estimators_'):
+                        for clf in ensemble.estimators_:
+                            if type(clf).__name__ == 'XGBClassifier' and not hasattr(clf, 'objective'):
+                                clf.objective = 'binary:logistic'
                 
                 if os.path.exists(importance_path):
                     self.feature_importances = joblib.load(importance_path)
