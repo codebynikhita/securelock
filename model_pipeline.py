@@ -120,13 +120,13 @@ def train_realistic_models():
     # Build Ensemble models
     # Fake Detector Ensemble
     rf_fake = RandomForestClassifier(n_estimators=300, max_depth=12, random_state=42)
-    xgb_fake = XGBClassifier(n_estimators=200, max_depth=6, learning_rate=0.08, random_state=42, eval_metric='logloss')
+    xgb_fake = XGBClassifier(eval_metric='logloss', objective='binary:logistic', n_estimators=200, max_depth=6, learning_rate=0.08, random_state=42)
     ensemble_fake = VotingClassifier(estimators=[('rf', rf_fake), ('xgb', xgb_fake)], voting='soft')
     ensemble_fake.fit(X_train_scaled, y_train_fake)
     
     # Clone Detector Ensemble
     rf_clone = RandomForestClassifier(n_estimators=300, max_depth=12, random_state=42)
-    xgb_clone = XGBClassifier(n_estimators=200, max_depth=6, learning_rate=0.08, random_state=42, eval_metric='logloss')
+    xgb_clone = XGBClassifier(eval_metric='logloss', objective='binary:logistic', n_estimators=200, max_depth=6, learning_rate=0.08, random_state=42)
     ensemble_clone = VotingClassifier(estimators=[('rf', rf_clone), ('xgb', xgb_clone)], voting='soft')
     ensemble_clone.fit(X_train_scaled, y_train_clone)
     
