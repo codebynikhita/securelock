@@ -231,5 +231,7 @@ if __name__ == '__main__':
         'bio': '',
         'content_similarity': 0.85
     }
-    print("\nSample Real-Time Inference on Suspicious Profile:")
-    print(predict_profile(test_profile))
+    # Sample Test is commented out because unpickling the model in the build script
+    # triggers the XGBoost Linux bug and crashes the Render build deployment!
+    # print("\nSample Real-Time Inference on Suspicious Profile:")
+    # print(predict_profile(test_profile))
