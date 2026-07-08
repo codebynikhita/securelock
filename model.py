@@ -3,7 +3,6 @@ import numpy as np
 import pandas as pd
 import joblib
 import re
-from xgboost import XGBClassifier
 
 # Removed dangerous __getattr__ hook that broke hasattr()
 
@@ -72,14 +71,6 @@ class SecureLockModel:
                 self.ensemble_clone = joblib.load(clone_path)
                 self.knn_fake = joblib.load(knn_fake_path)
                 self.knn_clone = joblib.load(knn_clone_path)
-
-                # Bulletproof instance-level XGBoost patch for Render Linux
-                for ensemble in [self.ensemble_fake, self.ensemble_clone]:
-                    if hasattr(ensemble, 'estimators_'):
-                        for clf in ensemble.estimators_:
-                            if hasattr(clf, 'get_booster'):  # Definitively identifies XGBoost
-                                clf.objective = 'binary:logistic'
-                                clf._objective = 'binary:logistic'
                 
                 if os.path.exists(importance_path):
                     self.feature_importances = joblib.load(importance_path)
@@ -94,27 +85,15 @@ class SecureLockModel:
                         'posts_count': 0.032,
                         'following_count': 0.022
                     }
-                # --- FIX LINUX UNPICKLING BUG ---
-                # The underlying C++ Booster object is dropped on Linux during joblib.load.
-                # We manually load it from the native JSON format and inject it back.
-                try:
-                    from xgboost import Booster
-                    xgb_fake_booster = Booster()
-                    xgb_fake_booster.load_model(os.path.join(MODEL_DIR, 'xgb_fake_booster.json'))
-                    self.ensemble_fake.estimators_[1]._Booster = xgb_fake_booster
-                    
-                    xgb_clone_booster = Booster()
-                    xgb_clone_booster.load_model(os.path.join(MODEL_DIR, 'xgb_clone_booster.json'))
-                    self.ensemble_clone.estimators_[1]._Booster = xgb_clone_booster
-                except Exception as e:
-                    print(f"Failed to load native boosters: {e}")
 
                 self.loaded = True
                 print("Models loaded successfully in SecureLockModel.")
             else:
-                print("Model files not found. Please run train.py first.")
+                print("Model files not found. Please run model_pipeline.py first.")
         except Exception as e:
             print(f"Error loading models: {e}")
+            import traceback
+            traceback.print_exc()
 
     def evaluate_rules(self, raw_features):
         """

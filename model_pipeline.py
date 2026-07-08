@@ -5,9 +5,8 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from sklearn.ensemble import RandomForestClassifier, VotingClassifier
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, VotingClassifier
 from sklearn.neighbors import KNeighborsClassifier
-from model_def import XGBClassifier
 from sklearn.metrics import classification_report, accuracy_score
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -117,22 +116,20 @@ def train_realistic_models():
     # Save Scaler
     joblib.dump(scaler, os.path.join(MODEL_DIR, 'scaler.joblib'))
     
-    # Build Ensemble models
-    # Fake Detector Ensemble
-    rf_fake = RandomForestClassifier(n_estimators=300, max_depth=12, random_state=42)
-    xgb_fake = XGBClassifier(eval_metric='logloss', objective='binary:logistic', n_estimators=200, max_depth=6, learning_rate=0.08, random_state=42)
-    ensemble_fake = VotingClassifier(estimators=[('rf', rf_fake), ('xgb', xgb_fake)], voting='soft')
+    # Build Ensemble models using pure sklearn classifiers (no XGBoost)
+    # This ensures joblib compatibility across all Python versions on Render
+    
+    # Fake Detector Ensemble (RandomForest + GradientBoosting)
+    rf_fake = RandomForestClassifier(n_estimators=200, max_depth=12, random_state=42, n_jobs=-1)
+    gb_fake = GradientBoostingClassifier(n_estimators=150, max_depth=5, learning_rate=0.08, random_state=42)
+    ensemble_fake = VotingClassifier(estimators=[('rf', rf_fake), ('gb', gb_fake)], voting='soft')
     ensemble_fake.fit(X_train_scaled, y_train_fake)
     
-    # Clone Detector Ensemble
-    rf_clone = RandomForestClassifier(n_estimators=300, max_depth=12, random_state=42)
-    xgb_clone = XGBClassifier(eval_metric='logloss', objective='binary:logistic', n_estimators=200, max_depth=6, learning_rate=0.08, random_state=42)
-    ensemble_clone = VotingClassifier(estimators=[('rf', rf_clone), ('xgb', xgb_clone)], voting='soft')
+    # Clone Detector Ensemble (RandomForest + GradientBoosting)
+    rf_clone = RandomForestClassifier(n_estimators=200, max_depth=12, random_state=42, n_jobs=-1)
+    gb_clone = GradientBoostingClassifier(n_estimators=150, max_depth=5, learning_rate=0.08, random_state=42)
+    ensemble_clone = VotingClassifier(estimators=[('rf', rf_clone), ('gb', gb_clone)], voting='soft')
     ensemble_clone.fit(X_train_scaled, y_train_clone)
-    
-    # NATIVELY SAVE XGBOOST BOOSTERS TO BYPASS LINUX JOBLIB BUG
-    ensemble_fake.estimators_[1].get_booster().save_model(os.path.join(MODEL_DIR, 'xgb_fake_booster.json'))
-    ensemble_clone.estimators_[1].get_booster().save_model(os.path.join(MODEL_DIR, 'xgb_clone_booster.json'))
     
     # Train KNN models for anomaly boundaries
     knn_fake = KNeighborsClassifier(n_neighbors=7)
@@ -223,19 +220,3 @@ def predict_profile(profile_data, scaler_dir=MODEL_DIR):
 
 if __name__ == '__main__':
     train_realistic_models()
-    
-    # Sample Test
-    test_profile = {
-        'username': 'fake_nikhita_983742',
-        'followers_count': 5,
-        'following_count': 3500,
-        'account_age': 15,
-        'posts_count': 850,
-        'profile_picture': 0,
-        'bio': '',
-        'content_similarity': 0.85
-    }
-    # Sample Test is commented out because unpickling the model in the build script
-    # triggers the XGBoost Linux bug and crashes the Render build deployment!
-    # print("\nSample Real-Time Inference on Suspicious Profile:")
-    # print(predict_profile(test_profile))
