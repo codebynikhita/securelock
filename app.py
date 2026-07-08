@@ -37,6 +37,21 @@ def utility_processor():
 model_engine = SecureLockModel()
 database.init_db()
 
+# Auto-train fallback: if models didn't load from disk (build step failed),
+# train them now at startup so the app is always functional
+if not model_engine.loaded:
+    print("[STARTUP] Models not found — training now (this takes ~60s on first deploy)...")
+    try:
+        from model_pipeline import train_realistic_models
+        train_realistic_models()
+        model_engine.load_models()
+        print("[STARTUP] Auto-training complete.")
+    except Exception as train_err:
+        print(f"[STARTUP ERROR] Failed to auto-train models: {train_err}")
+        import traceback
+        traceback.print_exc()
+
+
 # Load Dataset Cache
 CSV_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'accounts.csv')
 if os.path.exists(CSV_PATH):
@@ -475,6 +490,15 @@ def detect():
         
     # Run prediction pipeline
     result = model_engine.detect(account_data, db_profiles_list)
+    
+    # Guard: if models aren't loaded, detect() returns an error dict — show friendly error
+    if 'error' in result and 'combined_risk_score' not in result:
+        print(f"[ERROR] model_engine.detect() failed: {result.get('error')}")
+        return render_template('index.html',
+            error=f"⚠️ Analysis engine is warming up. Please try again in a moment. ({result.get('error', 'Models not ready')})",
+            db_stats=db_stats,
+            suggestions=suggestions
+        )
     
     # Determine which fields were scraped live vs estimated fallbacks
     sources = {
