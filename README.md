@@ -111,7 +111,7 @@ securelock/
 
 ```bash
 # 1. Clone the repo
-git clone https://github.com/yourusername/securelock.git
+git clone https://github.com/codebynikhita/securelock.git
 cd securelock
 
 # 2. Create virtual environment
