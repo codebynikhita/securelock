@@ -306,17 +306,22 @@ class SecureLockModel:
         # Scale features
         scaled = self.scaler.transform(feature_vector)
         
-        # Run model predictions
-        fake_prob = self.ensemble_fake.predict_proba(scaled)[0, 1]
-        clone_prob = self.ensemble_clone.predict_proba(scaled)[0, 1]
+        # Inject missing objective for XGBoost unpickling bug
+        self.ensemble_fake.estimators_[1].objective = 'binary:logistic'
+        self.ensemble_clone.estimators_[1].objective = 'binary:logistic'
+
+        # Individual classifier probabilities for Fake
+        rf_fake_prob = self.ensemble_fake.estimators_[0].predict_proba(scaled)[0, 1]
+        xgb_fake_prob = self.ensemble_fake.estimators_[1].predict_proba(scaled)[0, 1]
+        fake_prob = (rf_fake_prob + xgb_fake_prob) / 2.0
         
-        # Individual classifier probabilities
-        rf_fake_prob = self.ensemble_fake.named_estimators_['rf'].predict_proba(scaled)[0, 1]
-        xgb_fake_prob = self.ensemble_fake.named_estimators_['xgb'].predict_proba(scaled)[0, 1]
+        # Individual classifier probabilities for Clone
+        rf_clone_prob = self.ensemble_clone.estimators_[0].predict_proba(scaled)[0, 1]
+        xgb_clone_prob = self.ensemble_clone.estimators_[1].predict_proba(scaled)[0, 1]
+        clone_prob = (rf_clone_prob + xgb_clone_prob) / 2.0
+        
         knn_fake_prob = self.knn_fake.predict_proba(scaled)[0, 1]
         
-        rf_clone_prob = self.ensemble_clone.named_estimators_['rf'].predict_proba(scaled)[0, 1]
-        xgb_clone_prob = self.ensemble_clone.named_estimators_['xgb'].predict_proba(scaled)[0, 1]
         knn_clone_prob = self.knn_clone.predict_proba(scaled)[0, 1]
         
         # Evaluate rule-based fallback
