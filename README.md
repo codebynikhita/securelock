@@ -11,7 +11,7 @@
 [![Render](https://img.shields.io/badge/Deployed%20on-Render-46E3B7?style=flat-square&logo=render&logoColor=white)](https://render.com)
 [![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
 
-**Live Demo → [securelock.onrender.com](https://securelock.onrender.com)**
+**Live Demo → [securelock-1.onrender.com](https://securelock-1.onrender.com)**
 
 </div>
 
@@ -205,5 +205,5 @@ MIT — use it, fork it, improve it. Just don't submit it as your own university
 
 <div align="center">
 Built solo by <strong>Nikhita G P</strong> &nbsp;|&nbsp; 2026 &nbsp;|&nbsp;
-<a href="https://securelock.onrender.com">Live Demo</a>
+<a href="https://securelock-1.onrender.com">Live Demo</a>
 </div>
