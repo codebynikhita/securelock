@@ -17,6 +17,14 @@ socket.setdefaulttimeout(5.0)
 app = Flask(__name__)
 app.secret_key = 'securelock_secret_session_key_2026'
 
+import traceback
+@app.errorhandler(Exception)
+def handle_exception(e):
+    return jsonify({
+        "error": str(e),
+        "traceback": traceback.format_exc()
+    }), 500
+
 @app.context_processor
 def utility_processor():
     def format_number(val):
