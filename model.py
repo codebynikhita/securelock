@@ -306,9 +306,15 @@ class SecureLockModel:
         # Scale features
         scaled = self.scaler.transform(feature_vector)
         
-        # Inject missing objective for XGBoost unpickling bug
-        self.ensemble_fake.estimators_[1].objective = 'binary:logistic'
-        self.ensemble_clone.estimators_[1].objective = 'binary:logistic'
+        # Inject ALL missing attributes for XGBoost unpickling bug by copying from a fresh instance
+        from xgboost import XGBClassifier
+        fresh_xgb = XGBClassifier(objective='binary:logistic')
+        for clf in [self.ensemble_fake.estimators_[1], self.ensemble_clone.estimators_[1]]:
+            for attr, value in fresh_xgb.__dict__.items():
+                if not hasattr(clf, attr):
+                    setattr(clf, attr, value)
+            # Explicitly force objective just in case
+            clf.objective = 'binary:logistic'
 
         # Individual classifier probabilities for Fake
         rf_fake_prob = self.ensemble_fake.estimators_[0].predict_proba(scaled)[0, 1]
