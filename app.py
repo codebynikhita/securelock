@@ -37,20 +37,6 @@ def utility_processor():
 model_engine = SecureLockModel()
 database.init_db()
 
-# Auto-train fallback: if models didn't load from disk (build step failed),
-# train them now at startup so the app is always functional
-if not model_engine.loaded:
-    print("[STARTUP] Models not found — training now (this takes ~60s on first deploy)...")
-    try:
-        from model_pipeline import train_realistic_models
-        train_realistic_models()
-        model_engine.load_models()
-        print("[STARTUP] Auto-training complete.")
-    except Exception as train_err:
-        print(f"[STARTUP ERROR] Failed to auto-train models: {train_err}")
-        import traceback
-        traceback.print_exc()
-
 
 # Load Dataset Cache
 CSV_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'accounts.csv')

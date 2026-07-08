@@ -9,15 +9,6 @@ __pycache__/
 dist/
 build/
 
-# Model files - trained at runtime by build script on Render, not committed to git
-*.pkl
-*.joblib
-*.h5
-data/models/
-
-# Data
-data/*.json
-
 # Environment
 .env
 .env.local
@@ -41,5 +32,6 @@ Thumbs.db
 # Node (if any)
 node_modules/
 
-# Force include accounts.csv for training on Render
-!data/accounts.csv
+# Old XGBoost booster files no longer needed
+data/models/xgb_fake_booster.json
+data/models/xgb_clone_booster.json
