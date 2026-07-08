@@ -497,6 +497,10 @@ def detect():
         
     return render_template('index.html', report=full_report, status_logs=status_logs, suggestions=suggestions, stats=db_stats)
 
+@app.route('/api/version', methods=['GET'])
+def api_version():
+    return jsonify({"commit": "be2c04a", "status": "active"}), 200
+
 @app.route('/api/detect', methods=['POST', 'GET'])
 def api_detect():
     """
