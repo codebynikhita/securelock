@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Login - SecureLock{% endblock %}
+
+{% block content %}
+<div class="glass-panel login-container">
+    <div class="login-header">
+        <i class="fa-solid fa-lock"></i>
+        <h2>Admin Authentication</h2>
+        <p>Access the SecureLock security dashboard</p>
+    </div>
+    
+    {% if error %}
+        <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.25); color: #f87171; padding: 0.75rem 1rem; border-radius: 10px; margin-bottom: 1.5rem; font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span>{{ error }}</span>
+        </div>
+    {% endif %}
+    
+    <form action="/admin/login" method="POST">
+        <div class="login-form-group">
+            <label for="username">Admin Username</label>
+            <div class="login-input-wrapper">
+                <input type="text" id="username" name="username" class="login-input" placeholder="admin" required autocomplete="off">
+                <i class="fa-solid fa-user"></i>
+            </div>
+        </div>
+        
+        <div class="login-form-group" style="margin-bottom: 2rem;">
+            <label for="password">Security Password</label>
+            <div class="login-input-wrapper">
+                <input type="password" id="password" name="password" class="login-input" placeholder="••••••••" required>
+                <i class="fa-solid fa-key"></i>
+            </div>
+        </div>
+        
+        <button type="submit" class="btn-login">Verify Credentials</button>
+    </form>
+</div>
+{% endblock %}
