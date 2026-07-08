@@ -1,79 +1,200 @@
 <!DOCTYPE html>
-<html lang="en">
+<html class="dark" lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}SecureLock — AI-Powered Fake Account Detection{% endblock %}</title>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>{% block title %}SHADOW_PROTOCOL | Digital Identity Defense{% endblock %}</title>
     <meta name="description" content="SecureLock uses advanced ensemble machine learning to detect fake, cloned and bot social media accounts in real-time. 99.8% accuracy across Instagram, Twitter, Facebook & LinkedIn.">
-    <meta name="keywords" content="fake account detection, social media security, bot detection, clone detection, AI, machine learning">
-    <meta property="og:title" content="SecureLock — Fake Account Detection">
-    <meta property="og:description" content="AI-powered social media account verification and threat detection.">
+    
+    <!-- Tailwind CSS with custom config -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary": "#520072",
+                    "on-error": "#690005",
+                    "inverse-surface": "#e5e2e3",
+                    "surface-container": "#201f20",
+                    "on-secondary-fixed": "#320047",
+                    "outline": "#8e9379",
+                    "outline-variant": "#444933",
+                    "on-secondary-container": "#fff6fc",
+                    "tertiary-fixed": "#7df4ff",
+                    "secondary-fixed": "#f8d8ff",
+                    "on-tertiary": "#00363a",
+                    "on-primary-fixed": "#161e00",
+                    "surface": "#131314",
+                    "surface-dim": "#131314",
+                    "on-surface": "#e5e2e3",
+                    "error-container": "#93000a",
+                    "on-primary": "#283500",
+                    "surface-variant": "#353436",
+                    "secondary-fixed-dim": "#ebb2ff",
+                    "primary-fixed-dim": "#abd600",
+                    "on-primary-container": "#556d00",
+                    "on-error-container": "#ffdad6",
+                    "surface-container-low": "#1c1b1c",
+                    "surface-bright": "#3a393a",
+                    "on-secondary-fixed-variant": "#74009f",
+                    "on-tertiary-fixed": "#002022",
+                    "on-tertiary-fixed-variant": "#004f54",
+                    "surface-container-lowest": "#0e0e0f",
+                    "on-primary-fixed-variant": "#3c4d00",
+                    "surface-container-high": "#2a2a2b",
+                    "tertiary": "#ffffff",
+                    "inverse-on-surface": "#313031",
+                    "secondary": "#ebb2ff",
+                    "background": "#131314",
+                    "primary": "#ffffff",
+                    "inverse-primary": "#506600",
+                    "primary-fixed": "#c3f400",
+                    "on-background": "#e5e2e3",
+                    "surface-tint": "#abd600",
+                    "on-surface-variant": "#c4c9ac",
+                    "secondary-container": "#b600f8",
+                    "surface-container-highest": "#353436",
+                    "tertiary-container": "#7df4ff",
+                    "tertiary-fixed-dim": "#00dbe9",
+                    "error": "#ffb4ab",
+                    "primary-container": "#c3f400",
+                    "on-tertiary-container": "#006f77"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "gutter": "24px",
+                    "container-max": "1440px",
+                    "margin-desktop": "64px",
+                    "margin-mobile": "20px",
+                    "unit": "4px"
+            }
+          },
+        },
+      }
+    </script>
+
+    <!-- Google Fonts & Material Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <!-- Custom style overrides for cyberpunk animations/grid -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     {% block extra_head %}{% endblock %}
 </head>
-<body>
+<body class="font-sans antialiased text-sm text-on-surface">
 
-<header class="main-header">
-    <div class="nav-inner">
-        <a href="/" class="logo-container">
-            <div class="logo-icon-wrapper">
-                <i class="fa-solid fa-shield-halved"></i>
-            </div>
-            <div class="logo-text-wrapper">
-                <span class="logo-title">SecureLock</span>
-                <span class="logo-subtitle">Account Intelligence</span>
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full z-50 bg-surface/70 backdrop-blur-xl border-b border-outline-variant/20 shadow-[0_0_15px_rgba(171,214,0,0.1)] no-print">
+    <div class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-4 mx-auto max-w-container-max">
+        <a href="/" class="flex items-center gap-2 select-none group">
+            <span class="material-symbols-outlined text-primary-fixed text-2xl group-hover:scale-105 transition-transform" style="font-variation-settings: 'FILL' 1;">security</span>
+            <div class="flex flex-col">
+                <span class="font-bold tracking-tight text-white text-lg font-mono">SHADOW_PROTOCOL</span>
+                <span class="text-[9px] text-primary-fixed tracking-[2.5px] uppercase font-mono font-bold leading-none mt-0.5">SecureLock Engine</span>
             </div>
         </a>
-
-        <nav class="nav-links">
-            <a href="/#how-it-works" class="nav-link">How It Works</a>
-            <a href="/#features" class="nav-link">Features</a>
-            <a href="/admin/dashboard" class="nav-link">Analytics</a>
-            {% if session.get('admin_user') %}
-                <a href="/admin/logout" class="nav-link logout-link">Logout</a>
-            {% else %}
-                <a href="/admin/login" class="nav-link">Admin</a>
-            {% endif %}
-            <a href="/#analyze" class="nav-link nav-cta">Analyze Free</a>
+        <nav class="hidden md:flex items-center gap-8 font-mono">
+            <a class="text-xs text-primary-fixed border-b-2 border-primary-fixed pb-0.5" href="/#analyze">Audit</a>
+            <a class="text-xs text-on-surface-variant hover:text-white transition-colors" href="/#services">Shield</a>
+            <a class="text-xs text-on-surface-variant hover:text-white transition-colors" href="/#features">Intelligence</a>
+            <a class="text-xs text-on-surface-variant hover:text-white transition-colors" href="/admin/dashboard">Terminal</a>
         </nav>
+        <div class="flex items-center gap-4">
+            {% if session.get('admin_user') %}
+                <a href="/admin/logout" class="hidden md:block border border-red-400/30 text-red-300 font-mono text-xs px-5 py-2 hover:bg-red-500/10 transition-colors">
+                    LOGOUT
+                </a>
+            {% else %}
+                <a href="/admin/dashboard" class="hidden md:block bg-primary-fixed text-on-primary-fixed font-mono text-xs px-5 py-2 hover:shadow-[0_0_15px_rgba(171,214,0,0.3)] transition-all">
+                    DECRYPT ACCESS
+                </a>
+            {% endif %}
+            <button class="md:hidden text-white" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Mobile dropdown navigation -->
+    <div id="mobile-menu" class="hidden md:hidden border-t border-outline-variant/15 bg-surface/95 backdrop-blur-xl px-margin-mobile py-4 space-y-3 font-mono">
+        <a class="block text-sm text-primary-fixed" href="/#analyze">Audit</a>
+        <a class="block text-sm text-on-surface-variant hover:text-white transition-colors" href="/#services">Shield</a>
+        <a class="block text-sm text-on-surface-variant hover:text-white transition-colors" href="/#features">Intelligence</a>
+        <a class="block text-sm text-on-surface-variant hover:text-white transition-colors" href="/admin/dashboard">Terminal</a>
+        {% if session.get('admin_user') %}
+            <a href="/admin/logout" class="block border border-red-400/30 text-red-300 text-sm px-4 py-2 hover:bg-red-500/10 transition-colors">
+                LOGOUT
+            </a>
+        {% else %}
+            <a href="/admin/dashboard" class="block bg-primary-fixed text-on-primary-fixed text-sm px-4 py-2 hover:shadow-[0_0_15px_rgba(171,214,0,0.3)] transition-all">
+                DECRYPT ACCESS
+            </a>
+        {% endif %}
     </div>
 </header>
 
-<main>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <div class="flash-messages">
-                {% for category, message in messages %}
-                    <div class="glass-panel" style="padding: 1rem; border-color: {% if category == 'success' %}var(--success){% elif category == 'info' %}var(--primary){% else %}var(--danger){% endif %}; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
-                        <i class="fa-solid {% if category == 'success' %}fa-circle-check{% else %}fa-circle-info{% endif %}" style="color: {% if category == 'success' %}var(--success){% elif category == 'info' %}var(--primary){% else %}var(--danger){% endif %};"></i>
-                        <span>{{ message }}</span>
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
-    {% endwith %}
+<main class="min-h-screen relative pt-16">
+    <!-- Flash Messages -->
+    <div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop mt-4 no-print">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="space-y-2">
+                    {% for category, message in messages %}
+                        <div class="glass-panel px-4 py-3 flex items-center justify-between gap-3 border-l-4 
+                            {% if category == 'success' %}border-l-primary-fixed border-primary-fixed/20{% elif category == 'info' %}border-l-tertiary-fixed border-tertiary-fixed/20{% else %}border-l-error border-error/20{% endif %}">
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-base 
+                                    {% if category == 'success' %}text-primary-fixed{% elif category == 'info' %}text-tertiary-fixed{% else %}text-error{% endif %}">
+                                    {% if category == 'success' %}check_circle{% else %}info{% endif %}
+                                </span>
+                                <span class="text-sm font-mono text-white">{{ message }}</span>
+                            </div>
+                            <button class="text-on-surface-variant hover:text-white" onclick="this.parentElement.remove()">
+                                <span class="material-symbols-outlined text-xs">close</span>
+                            </button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+    </div>
 
     {% block content %}{% endblock %}
 </main>
 
-<footer>
-    <div class="footer-inner">
-        <div class="footer-brand">
-            <i class="fa-solid fa-shield-halved"></i>
-            SecureLock
+<!-- Footer -->
+<footer class="w-full py-12 border-t border-outline-variant/15 relative overflow-hidden bg-surface-container-lowest no-print">
+    <!-- Background Gradient simulation for footer -->
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_0%,_#0e0e0f_100%)] opacity-60 pointer-events-none"></div>
+    <div class="flex flex-col md:flex-row justify-between items-center w-full px-margin-mobile md:px-margin-desktop gap-6 mx-auto max-w-container-max relative z-10">
+        <div class="flex flex-col gap-1 text-center md:text-left">
+            <div class="flex items-center justify-center md:justify-start gap-2">
+                <span class="material-symbols-outlined text-secondary-fixed text-base">lock</span>
+                <span class="font-bold tracking-tight text-white font-mono text-sm">SHADOW_PROTOCOL</span>
+            </div>
+            <p class="font-mono text-[11px] text-on-surface-variant">
+                © 2026 SHADOW_PROTOCOL. ALL DATA REDACTED.
+            </p>
         </div>
-        <div class="footer-links">
-            <a href="/">Home</a>
-            <a href="/#how-it-works">How It Works</a>
-            <a href="/#features">Features</a>
-            <a href="/admin/dashboard">Analytics</a>
-            <a href="/admin/login">Admin</a>
+        <div class="flex flex-wrap justify-center gap-x-8 gap-y-2 font-mono text-xs">
+            <a class="text-on-surface-variant hover:text-tertiary-fixed-dim transition-colors" href="/#analyze">Encryption Protocol</a>
+            <a class="text-on-surface-variant hover:text-tertiary-fixed-dim transition-colors" href="/#services">Privacy Node</a>
+            <a class="text-on-surface-variant hover:text-tertiary-fixed-dim transition-colors" href="/#features">Signal Channel</a>
+            <a class="text-on-surface-variant hover:text-tertiary-fixed-dim transition-colors" href="/admin/dashboard">System Status</a>
         </div>
-        <p style="font-size: 0.82rem; color: var(--text-dark); line-height: 1.7; max-width: 640px; text-align: center; margin-top: 0.5rem;">
-            &copy; 2026 SecureLock. AI-powered social media account intelligence.
-        </p>
+        <div class="flex items-center gap-3 bg-surface-container-low px-4 py-1.5 border border-outline-variant/20">
+            <div class="w-2 h-2 rounded-full bg-primary-fixed animate-pulse shadow-[0_0_8px_rgba(171,214,0,1)]"></div>
+            <span class="font-mono text-[10px] text-primary-fixed font-bold uppercase tracking-wider">Status: ONLINE</span>
+        </div>
     </div>
 </footer>
 

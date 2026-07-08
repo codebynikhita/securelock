@@ -1,4 +1,5 @@
 import os
+import re
 import joblib
 import pandas as pd
 import numpy as np
@@ -38,7 +39,6 @@ def run_kaggle_validation():
     df['account_age'] = (ref_date - parsed_dates).dt.days / 365.0
     # Ensure no zero/negative age
     df['account_age'] = df['account_age'].clip(lower=0.01)
-    
     # Map features
     df['posts_count'] = pd.to_numeric(df['statuses_count'], errors='coerce').fillna(0)
     df['network_count'] = pd.to_numeric(df['followers_count'], errors='coerce').fillna(0)
@@ -51,24 +51,42 @@ def run_kaggle_validation():
     def_img = pd.to_numeric(df['default_profile_image'], errors='coerce').fillna(0)
     df['profile_picture'] = np.where(def_img == 1, 0, 1)
     
-    # Since Kaggle datasets don't have text duplicates/similarity metrics precomputed,
-    # we fill with standard baseline values
-    df['duplicate_posts'] = 0
-    df['content_similarity'] = 0.1
+    # Calculate daily age for checks
+    age_days = df['account_age'] * 365.0
     
-    # Feature Engineering
+    # Feature Engineering matching training/prediction pipeline
     df['network_following_ratio'] = df['network_count'] / (df['following_count'] + 1)
-    df['post_frequency'] = df['posts_count'] / (df['account_age'] * 365 + 1)
+    
+    username = df['screen_name'].fillna('').astype(str)
+    df['username_digit_ratio'] = username.apply(
+        lambda u: sum(c.isdigit() for c in u) / len(u) if len(u) > 0 else 0
+    )
+    df['username_has_trailing_digits'] = username.apply(
+        lambda u: 1 if re.search(r'\d{4,}$', u) else 0
+    )
+    
+    bio = df['description'].fillna('').astype(str)
+    bio_present = bio.apply(lambda b: 1 if len(b.strip()) > 0 else 0)
+    df['profile_completeness'] = df['profile_picture'] + bio_present + (df['posts_count'] > 0).astype(int)
+    
+    df['is_new_and_aggressive'] = (
+        (age_days < 30) & 
+        ((df['posts_count'] > 300) | (df['following_count'] > 1000))
+    ).astype(int)
+    
+    df['post_frequency'] = df['posts_count'] / (age_days + 1)
+    df['content_similarity'] = 0.1
     
     feature_cols = [
         'network_following_ratio',
+        'username_digit_ratio',
+        'username_has_trailing_digits',
+        'profile_completeness',
+        'is_new_and_aggressive',
         'account_age',
         'profile_picture',
         'post_frequency',
-        'content_similarity',
-        'duplicate_posts',
-        'posts_count',
-        'following_count'
+        'content_similarity'
     ]
     
     # 2. Extract features and target label

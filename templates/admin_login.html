@@ -1,40 +1,51 @@
 {% extends 'base.html' %}
 
-{% block title %}Admin Login - SecureLock{% endblock %}
+{% block title %}Admin Login - SHADOW_PROTOCOL{% endblock %}
 
 {% block content %}
-<div class="glass-panel login-container">
-    <div class="login-header">
-        <i class="fa-solid fa-lock"></i>
-        <h2>Admin Authentication</h2>
-        <p>Access the SecureLock security dashboard</p>
+<div class="relative min-h-[85vh] flex items-center justify-center py-16 px-margin-mobile">
+    <div class="absolute inset-0 z-0">
+        <div class="absolute inset-0 bg-black/85 z-10"></div>
+        <div class="absolute inset-0 cyber-grid z-0"></div>
     </div>
-    
-    {% if error %}
-        <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.25); color: #f87171; padding: 0.75rem 1rem; border-radius: 10px; margin-bottom: 1.5rem; font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem;">
-            <i class="fa-solid fa-circle-exclamation"></i>
-            <span>{{ error }}</span>
-        </div>
-    {% endif %}
-    
-    <form action="/admin/login" method="POST">
-        <div class="login-form-group">
-            <label for="username">Admin Username</label>
-            <div class="login-input-wrapper">
-                <input type="text" id="username" name="username" class="login-input" placeholder="admin" required autocomplete="off">
-                <i class="fa-solid fa-user"></i>
-            </div>
+
+    <div class="relative z-20 w-full max-w-md glass-panel p-8 md:p-10 border border-outline-variant/35 shadow-2xl">
+        <div class="scanline"></div>
+        
+        <div class="text-center mb-8">
+            <span class="material-symbols-outlined text-secondary-fixed text-5xl mb-2" style="font-variation-settings: 'FILL' 1;">admin_panel_settings</span>
+            <h2 class="font-mono text-lg font-bold text-white uppercase tracking-wider">DECRYPT ADMINISTRATIVE SYSTEM</h2>
+            <p class="font-mono text-[10px] text-on-surface-variant uppercase mt-1">Provide credential keys to establish session</p>
         </div>
         
-        <div class="login-form-group" style="margin-bottom: 2rem;">
-            <label for="password">Security Password</label>
-            <div class="login-input-wrapper">
-                <input type="password" id="password" name="password" class="login-input" placeholder="••••••••" required>
-                <i class="fa-solid fa-key"></i>
+        {% if error %}
+            <div class="bg-error/5 border border-error/25 text-error px-4 py-3 text-xs font-mono mb-6 flex items-center gap-2">
+                <span class="material-symbols-outlined text-sm">error</span>
+                <span>{{ error }}</span>
             </div>
-        </div>
+        {% endif %}
         
-        <button type="submit" class="btn-login">Verify Credentials</button>
-    </form>
+        <form action="/admin/login" method="POST" class="space-y-5 font-mono text-xs">
+            <div class="space-y-1.5">
+                <label for="username" class="block font-bold text-white uppercase tracking-wider">Admin Username</label>
+                <div class="relative flex items-center">
+                    <span class="material-symbols-outlined absolute left-3 text-on-surface-variant text-base">person</span>
+                    <input type="text" id="username" name="username" class="w-full bg-black border border-outline-variant/20 py-3 pl-10 pr-4 text-white outline-none focus:border-primary-fixed text-xs" placeholder="username" required autocomplete="off">
+                </div>
+            </div>
+            
+            <div class="space-y-1.5">
+                <label for="password" class="block font-bold text-white uppercase tracking-wider">Security Password</label>
+                <div class="relative flex items-center">
+                    <span class="material-symbols-outlined absolute left-3 text-on-surface-variant text-base">key</span>
+                    <input type="password" id="password" name="password" class="w-full bg-black border border-outline-variant/20 py-3 pl-10 pr-4 text-white outline-none focus:border-primary-fixed text-xs" placeholder="••••••••" required>
+                </div>
+            </div>
+            
+            <button type="submit" class="w-full bg-primary-fixed hover:bg-primary-fixed/90 text-on-primary-fixed font-bold py-3.5 uppercase tracking-widest hover:shadow-[0_0_15px_rgba(171,214,0,0.3)] transition-all mt-8">
+                VERIFY CREDENTIALS
+            </button>
+        </form>
+    </div>
 </div>
 {% endblock %}

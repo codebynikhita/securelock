@@ -40,3 +40,7 @@ Thumbs.db
 
 # Node (if any)
 node_modules/
+
+# Force include dataset and model files for deployment
+!data/accounts.csv
+!data/models/*.joblib

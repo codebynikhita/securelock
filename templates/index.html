@@ -1,470 +1,568 @@
 {% extends 'base.html' %}
-{% block title %}SecureLock — AI-Powered Fake Account Detection{% endblock %}
+{% block title %}SHADOW_PROTOCOL | Digital Identity Defense{% endblock %}
 
 {% block extra_head %}
+<!-- Special styling overrides for platform button highlights in results/landing forms -->
 <style>
-.platform-btn { background: rgba(255,255,255,0.04) !important; border: 1px solid rgba(255,255,255,0.08) !important; color: var(--text-muted) !important; }
-.platform-btn:hover { background: rgba(255,255,255,0.08) !important; color: #fff !important; }
-.platform-btn.active { color: #fff !important; }
-.platform-btn[data-platform="twitter"].active  { background: rgba(29,161,242,0.15) !important; border-color: rgba(29,161,242,0.4) !important; }
-.platform-btn[data-platform="instagram"].active { background: rgba(225,48,108,0.15) !important; border-color: rgba(225,48,108,0.4) !important; }
-.platform-btn[data-platform="facebook"].active  { background: rgba(24,119,242,0.15) !important; border-color: rgba(24,119,242,0.4) !important; }
-.platform-btn[data-platform="linkedin"].active  { background: rgba(10,102,194,0.15) !important; border-color: rgba(10,102,194,0.4) !important; }
+    .platform-btn {
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .platform-btn.active {
+        box-shadow: 0 0 12px rgba(171, 214, 0, 0.2);
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 
 {% if error %}
-<!-- ERROR PAGE -->
-<div style="max-width:640px;margin:5rem auto;text-align:center;">
-    <div class="glass-panel" style="padding:2.5rem 2rem;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.3);">
-        <i class="fa-solid fa-circle-xmark" style="font-size:3rem;color:#ef4444;margin-bottom:1.25rem;display:block;"></i>
-        <h2 style="font-size:1.4rem;font-weight:700;color:#fff;margin-bottom:0.75rem;font-family:var(--font-mono);">Account Not Found</h2>
-        <p style="color:#9ca3af;font-size:0.95rem;margin-bottom:2rem;line-height:1.6;">{{ error }}</p>
-        <a href="/" style="display:inline-flex;align-items:center;gap:0.5rem;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#fff;padding:0.75rem 1.75rem;border-radius:30px;font-size:0.9rem;font-weight:600;text-decoration:none;">
-            <i class="fa-solid fa-arrow-left"></i> Try Again
+<!-- ================== ERROR PANEL ================== -->
+<div class="relative min-h-[80vh] flex items-center justify-center py-12 px-margin-mobile">
+    <div class="absolute inset-0 z-0">
+        <div class="absolute inset-0 bg-black/85 z-10"></div>
+        <div class="absolute inset-0 cyber-grid z-0"></div>
+    </div>
+    
+    <div class="relative z-20 w-full max-w-xl glass-panel p-8 md:p-10 border border-error/30 text-center shadow-[0_0_30px_rgba(255,180,171,0.05)]">
+        <div class="scanline"></div>
+        <span class="material-symbols-outlined text-error text-6xl mb-4" style="font-variation-settings: 'FILL' 1;">warning</span>
+        <h2 class="font-mono text-xl md:text-2xl text-white font-bold tracking-tight mb-4 uppercase">SYSTEM CORRUPTION :: NODE NOT FOUND</h2>
+        <p class="font-mono text-sm text-on-surface-variant leading-relaxed mb-8">{{ error }}</p>
+        
+        <a href="/" class="inline-flex items-center gap-2 bg-white/5 border border-white/10 hover:bg-white/10 text-white font-mono text-xs px-6 py-3 transition-colors">
+            <span class="material-symbols-outlined text-sm">arrow_back</span> REBOOT INQUIRY
         </a>
     </div>
 </div>
 
 {% elif report %}
-<!-- RESULTS PAGE -->
-<div style="margin:1.75rem auto 1rem;max-width:1100px;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
-    <a href="/" class="btn-analytics" style="text-decoration:none;">
-        <i class="fa-solid fa-arrow-left"></i> Back to Search
-    </a>
-    <div style="display:flex;align-items:center;gap:0.5rem;">
-        <span style="font-size:0.8rem;color:var(--text-muted);">Analyzed:</span>
-        <span style="font-size:0.85rem;font-weight:700;color:#fff;font-family:var(--font-mono);">@{{ report.username }}</span>
-        <span style="font-size:0.75rem;background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.25);color:var(--primary-light);padding:0.2rem 0.65rem;border-radius:20px;font-weight:600;">{{ report.platform | capitalize }}</span>
+<!-- ================== RESULTS DASHBOARD ================== -->
+<div class="relative min-h-screen py-10 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto cyber-grid">
+    
+    <!-- Top Action Row -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 mt-6 no-print">
+        <a href="/" class="inline-flex items-center gap-2 bg-white/5 border border-white/10 hover:bg-white/10 text-white font-mono text-xs px-5 py-2.5 transition-colors">
+            <span class="material-symbols-outlined text-xs">arrow_back</span> NEW SCAN
+        </a>
+        <div class="flex items-center gap-2 bg-surface-container-low px-4 py-2 border border-outline-variant/10 text-xs font-mono">
+            <span class="text-on-surface-variant">TARGET DECRYPTED:</span>
+            <span class="font-bold text-white">@{{ report.username }}</span>
+            <span class="ml-2 px-2 py-0.5 text-[10px] bg-primary-fixed/15 text-primary-fixed border border-primary-fixed/30 uppercase tracking-widest">{{ report.platform }}</span>
+        </div>
+    </div>
+
+    <!-- Main Split Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        <!-- LEFT PANEL - Threat & Verdict Summary -->
+        <div class="lg:col-span-4 glass-panel p-8 flex flex-col items-center gap-6 relative overflow-hidden">
+            <div class="scanline"></div>
+            
+            <!-- Dynamic Risk Gauge -->
+            <div class="relative w-44 h-44 flex items-center justify-center">
+                <svg width="100%" height="100%" viewBox="0 0 100 100" class="-rotate-95">
+                    <circle cx="50" cy="50" r="42" stroke="rgba(255,255,255,0.03)" stroke-width="7" fill="transparent"/>
+                    <circle cx="50" cy="50" r="42"
+                        stroke="{% if report.combined_risk_score < 30 %}#abd600{% elif report.combined_risk_score < 60 %}#ebb2ff{% else %}#ffb4ab{% endif %}"
+                        stroke-width="7" fill="transparent"
+                        stroke-dasharray="264"
+                        stroke-dashoffset="{{ 264 - (264 * report.combined_risk_score / 100) }}"
+                        class="transition-all duration-1000 ease-out"/>
+                </svg>
+                <div class="absolute flex flex-col items-center text-center">
+                    <span class="text-3xl md:text-4xl font-extrabold text-white font-mono leading-none">{{ report.combined_risk_score | int }}%</span>
+                    <span class="text-[9px] text-on-surface-variant font-bold tracking-widest mt-1 font-mono">THREAT</span>
+                </div>
+            </div>
+
+            <!-- Username and details -->
+            <div class="text-center w-full border-t border-b border-outline-variant/10 py-4">
+                <h2 class="font-mono text-xl font-bold text-white tracking-tight break-all">@{{ report.username }}</h2>
+                <div class="text-[10px] text-on-surface-variant/60 font-mono tracking-widest uppercase mt-1">PROFILED ID :: SOCIAL_NODE_{{ report.username | length * 73 }}</div>
+            </div>
+
+            <!-- Classification pill -->
+            <div class="w-full text-center py-3 font-mono font-bold text-xs tracking-wider border uppercase
+                {% if report.classification == 'Genuine' %}
+                    bg-primary-fixed/5 text-primary-fixed border-primary-fixed/30
+                {% elif report.classification == 'Fake' %}
+                    bg-error/5 text-error border-error/30
+                {% else %}
+                    bg-secondary/5 text-secondary border-secondary/30
+                {% endif %}">
+                <span class="material-symbols-outlined text-sm align-middle mr-1.5" style="font-variation-settings: 'FILL' 1;">
+                    {% if report.classification == 'Genuine' %}verified_user{% elif report.classification == 'Fake' %}smart_toy{% else %}report{% endif %}
+                </span>
+                {{ report.classification }} NODE
+            </div>
+
+            <!-- Impersonation Alert target description -->
+            {% if report.clone_target %}
+            <div class="w-full bg-secondary/5 border border-secondary/20 p-4 font-mono text-[11px] leading-relaxed text-secondary-fixed-dim">
+                <div class="flex items-center gap-1.5 mb-1.5 font-bold uppercase text-white">
+                    <span class="material-symbols-outlined text-sm">content_copy</span> CLONE VECTOR DETECTED
+                </div>
+                Impersonates source node <strong class="text-white">@{{ report.clone_target.username }}</strong> with Levenshtein distance {{ report.clone_target.distance }}.
+                <div class="text-[9px] text-on-surface-variant/80 mt-2 font-mono">
+                    Cosine Similarity: {{ report.clone_target.cosine_similarity }} | Euclidean: {{ report.clone_target.euclidean_distance }}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Dynamic actions -->
+            <div class="w-full flex flex-col gap-2 mt-4 no-print">
+                <button onclick="window.print()" class="w-full flex items-center justify-center gap-2 border border-tertiary-fixed-dim/30 bg-tertiary-fixed-dim/5 text-tertiary-fixed-dim hover:bg-tertiary-fixed-dim/15 hover:border-tertiary-fixed-dim/50 font-mono text-xs py-3 transition-all">
+                    <span class="material-symbols-outlined text-xs">download</span> SECURE DECRYPTED PDF
+                </button>
+                <button type="button" id="btn-report" class="w-full flex items-center justify-center gap-2 border border-error/30 bg-error/5 text-error hover:bg-error/15 hover:border-error/50 font-mono text-xs py-3 transition-all">
+                    <span class="material-symbols-outlined text-xs">flag</span> RE-FLAG INCIDENT
+                </button>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL - Data Logs and Parameter Tweaks -->
+        <div class="lg:col-span-8 flex flex-col gap-6">
+            
+            <!-- Real-time scraper logs -->
+            {% if status_logs %}
+            <div class="glass-panel p-5 relative overflow-hidden no-print">
+                <div class="scanline"></div>
+                <div class="flex items-center gap-2 mb-3 border-b border-outline-variant/15 pb-2 bg-surface-container-low/20 px-2 -mx-5 -mt-5">
+                    <span class="material-symbols-outlined text-primary-fixed text-sm">terminal</span>
+                    <span class="font-mono text-xs font-bold text-white uppercase tracking-wider">LIVE SCRAPER CONSOLE LOG</span>
+                </div>
+                <div class="h-28 overflow-y-auto font-mono text-[10px] text-primary-fixed/80 space-y-1 bg-surface-container-lowest/80 p-3 border border-outline-variant/10 leading-relaxed">
+                    {% for log in status_logs %}
+                        <div><span class="text-white/20 select-none">&gt; </span>{{ log }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Interactive Parameters Tuning Form -->
+            <form action="/detect" method="POST" class="glass-panel p-6 md:p-8 flex flex-col gap-6 relative">
+                <input type="hidden" name="username" value="{{ report.username }}">
+                <input type="hidden" name="platform" value="{{ report.platform }}">
+                <input type="hidden" name="manual_mode" value="true">
+                
+                <div class="flex items-center justify-between border-b border-outline-variant/15 pb-3">
+                    <h3 class="font-mono text-sm font-bold text-white uppercase tracking-wider">BEHAVIORAL DATA ATTRIBUTES</h3>
+                    <span class="font-mono text-[10px] text-on-surface-variant uppercase no-print">TAP VALUES TO EDIT & OVERRIDE</span>
+                </div>
+
+                <!-- Parameters grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Followers -->
+                    <div class="bg-surface-container-lowest/50 border border-outline-variant/15 p-4 text-center group hover:border-primary-fixed/40 transition-colors">
+                        {% if report.sources and report.sources.followers == 'live' %}
+                            <div class="text-[9px] text-primary-fixed font-bold tracking-widest font-mono mb-1 uppercase"><span class="w-1.5 h-1.5 inline-block bg-primary-fixed rounded-full mr-1 animate-pulse"></span> SCRAPED LIVE</div>
+                        {% else %}
+                            <div class="text-[9px] text-secondary font-bold tracking-widest font-mono mb-1 uppercase"><span class="w-1.5 h-1.5 inline-block bg-secondary rounded-full mr-1"></span> ESTIMATED</div>
+                        {% endif %}
+                        <input type="number" name="followers" value="{{ report.network_count }}" class="w-full bg-transparent border-0 border-b border-dashed border-outline-variant/35 py-1 text-center font-mono text-2xl font-extrabold text-white focus:ring-0 focus:border-primary-fixed outline-none" required>
+                        <div class="text-[10px] text-on-surface-variant font-mono uppercase tracking-widest mt-2 flex items-center justify-center gap-1">Followers <span class="material-symbols-outlined text-[10px] opacity-45 no-print">edit</span></div>
+                    </div>
+                    <!-- Following -->
+                    <div class="bg-surface-container-lowest/50 border border-outline-variant/15 p-4 text-center group hover:border-primary-fixed/40 transition-colors">
+                        {% if report.sources and report.sources.following == 'live' %}
+                            <div class="text-[9px] text-primary-fixed font-bold tracking-widest font-mono mb-1 uppercase"><span class="w-1.5 h-1.5 inline-block bg-primary-fixed rounded-full mr-1 animate-pulse"></span> SCRAPED LIVE</div>
+                        {% else %}
+                            <div class="text-[9px] text-secondary font-bold tracking-widest font-mono mb-1 uppercase"><span class="w-1.5 h-1.5 inline-block bg-secondary rounded-full mr-1"></span> ESTIMATED</div>
+                        {% endif %}
+                        <input type="number" name="following" value="{{ report.following_count }}" class="w-full bg-transparent border-0 border-b border-dashed border-outline-variant/35 py-1 text-center font-mono text-2xl font-extrabold text-white focus:ring-0 focus:border-primary-fixed outline-none" required>
+                        <div class="text-[10px] text-on-surface-variant font-mono uppercase tracking-widest mt-2 flex items-center justify-center gap-1">Following <span class="material-symbols-outlined text-[10px] opacity-45 no-print">edit</span></div>
+                    </div>
+                    <!-- Posts -->
+                    <div class="bg-surface-container-lowest/50 border border-outline-variant/15 p-4 text-center group hover:border-primary-fixed/40 transition-colors">
+                        {% if report.sources and report.sources.posts == 'live' %}
+                            <div class="text-[9px] text-primary-fixed font-bold tracking-widest font-mono mb-1 uppercase"><span class="w-1.5 h-1.5 inline-block bg-primary-fixed rounded-full mr-1 animate-pulse"></span> SCRAPED LIVE</div>
+                        {% else %}
+                            <div class="text-[9px] text-secondary font-bold tracking-widest font-mono mb-1 uppercase"><span class="w-1.5 h-1.5 inline-block bg-secondary rounded-full mr-1"></span> ESTIMATED</div>
+                        {% endif %}
+                        <input type="number" name="posts" value="{{ report.posts_count }}" class="w-full bg-transparent border-0 border-b border-dashed border-outline-variant/35 py-1 text-center font-mono text-2xl font-extrabold text-white focus:ring-0 focus:border-primary-fixed outline-none" required>
+                        <div class="text-[10px] text-on-surface-variant font-mono uppercase tracking-widest mt-2 flex items-center justify-center gap-1">Posts <span class="material-symbols-outlined text-[10px] opacity-45 no-print">edit</span></div>
+                    </div>
+                    <!-- Account Age -->
+                    <div class="bg-surface-container-lowest/50 border border-outline-variant/15 p-4 text-center group hover:border-primary-fixed/40 transition-colors">
+                        {% if report.sources and report.sources.account_age == 'live' %}
+                            <div class="text-[9px] text-primary-fixed font-bold tracking-widest font-mono mb-1 uppercase"><span class="w-1.5 h-1.5 inline-block bg-primary-fixed rounded-full mr-1 animate-pulse"></span> SCRAPED LIVE</div>
+                        {% else %}
+                            <div class="text-[9px] text-secondary font-bold tracking-widest font-mono mb-1 uppercase"><span class="w-1.5 h-1.5 inline-block bg-secondary rounded-full mr-1"></span> ESTIMATED</div>
+                        {% endif %}
+                        <input type="number" step="0.01" name="account_age" value="{{ report.account_age | round(2) }}" class="w-full bg-transparent border-0 border-b border-dashed border-outline-variant/35 py-1 text-center font-mono text-2xl font-extrabold text-white focus:ring-0 focus:border-primary-fixed outline-none" required>
+                        <div class="text-[10px] text-on-surface-variant font-mono uppercase tracking-widest mt-2 flex items-center justify-center gap-1">Age in Years <span class="material-symbols-outlined text-[10px] opacity-45 no-print">edit</span></div>
+                    </div>
+                </div>
+
+                <!-- Auxiliary properties and update button -->
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 border-t border-outline-variant/10 pt-6">
+                    <div class="flex items-center gap-4 bg-surface-container-lowest border border-outline-variant/10 p-3 flex-1">
+                        <span class="font-mono text-xs text-on-surface-variant uppercase">Profile Picture:</span>
+                        <select name="profile_picture" class="bg-surface border border-outline-variant/20 text-white font-mono text-xs px-3 py-1.5 outline-none cursor-pointer focus:border-primary-fixed">
+                            <option value="1" {% if report.profile_picture == 1 %}selected{% endif %}>AVAILABLE</option>
+                            <option value="0" {% if report.profile_picture == 0 %}selected{% endif %}>EMPTY</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="flex-1 bg-primary-fixed hover:bg-primary-fixed/90 text-on-primary-fixed font-mono text-xs font-bold py-4 px-6 flex items-center justify-center gap-2 hover:shadow-[0_0_20px_rgba(171,214,0,0.3)] transition-all no-print">
+                        <span class="material-symbols-outlined text-sm">sync</span> RE-EVALUATE PARAMETERS
+                    </button>
+                </div>
+            </form>
+
+            <!-- Algorithm Classifier breakdown charts -->
+            <div class="glass-panel p-6 md:p-8 flex flex-col gap-6">
+                <div class="border-b border-outline-variant/15 pb-3">
+                    <h3 class="font-mono text-sm font-bold text-white uppercase tracking-wider">3-CLASSIFIER ENSEMBLE BREAKDOWN</h3>
+                </div>
+                
+                <div class="space-y-6">
+                    <!-- Random Forest -->
+                    <div class="border-b border-outline-variant/10 pb-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-mono text-xs font-bold text-white">1. Random Forest (Bagging Ensemble)</span>
+                            <span class="font-mono text-[10px] font-bold px-2 py-0.5 uppercase border
+                                {% if report.rf_classification == 'Genuine' %}
+                                    bg-primary-fixed/10 text-primary-fixed border-primary-fixed/30
+                                {% elif report.rf_classification == 'Fake' %}
+                                    bg-error/10 text-error border-error/30
+                                {% else %}
+                                    bg-secondary/10 text-secondary border-secondary/30
+                                {% endif %}">{{ report.rf_classification }}</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 mt-2 font-mono text-[10px] text-on-surface-variant">
+                            <div>
+                                <div class="flex justify-between mb-1"><span>Fake Prob:</span><span class="font-bold text-white">{{ (report.rf_fake_prob * 100) | int }}%</span></div>
+                                <div class="h-1.5 bg-white/5 rounded-full overflow-hidden"><div class="h-full bg-error" style="width: {{ (report.rf_fake_prob * 100) | int }}%"></div></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-1"><span>Clone Prob:</span><span class="font-bold text-white">{{ (report.rf_clone_prob * 100) | int }}%</span></div>
+                                <div class="h-1.5 bg-white/5 rounded-full overflow-hidden"><div class="h-full bg-secondary" style="width: {{ (report.rf_clone_prob * 100) | int }}%"></div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- XGBoost -->
+                    <div class="border-b border-outline-variant/10 pb-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-mono text-xs font-bold text-white">2. XGBoost (Boosting Ensemble)</span>
+                            <span class="font-mono text-[10px] font-bold px-2 py-0.5 uppercase border
+                                {% if report.xgb_classification == 'Genuine' %}
+                                    bg-primary-fixed/10 text-primary-fixed border-primary-fixed/30
+                                {% elif report.xgb_classification == 'Fake' %}
+                                    bg-error/10 text-error border-error/30
+                                {% else %}
+                                    bg-secondary/10 text-secondary border-secondary/30
+                                {% endif %}">{{ report.xgb_classification }}</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 mt-2 font-mono text-[10px] text-on-surface-variant">
+                            <div>
+                                <div class="flex justify-between mb-1"><span>Fake Prob:</span><span class="font-bold text-white">{{ (report.xgb_fake_prob * 100) | int }}%</span></div>
+                                <div class="h-1.5 bg-white/5 rounded-full overflow-hidden"><div class="h-full bg-error" style="width: {{ (report.xgb_fake_prob * 100) | int }}%"></div></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-1"><span>Clone Prob:</span><span class="font-bold text-white">{{ (report.xgb_clone_prob * 100) | int }}%</span></div>
+                                <div class="h-1.5 bg-white/5 rounded-full overflow-hidden"><div class="h-full bg-secondary" style="width: {{ (report.xgb_clone_prob * 100) | int }}%"></div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- KNN -->
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-mono text-xs font-bold text-white">3. K-Nearest Neighbors (Distance Spatial)</span>
+                            <span class="font-mono text-[10px] font-bold px-2 py-0.5 uppercase border
+                                {% if report.knn_classification == 'Genuine' %}
+                                    bg-primary-fixed/10 text-primary-fixed border-primary-fixed/30
+                                {% elif report.knn_classification == 'Fake' %}
+                                    bg-error/10 text-error border-error/30
+                                {% else %}
+                                    bg-secondary/10 text-secondary border-secondary/30
+                                {% endif %}">{{ report.knn_classification }}</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 mt-2 font-mono text-[10px] text-on-surface-variant">
+                            <div>
+                                <div class="flex justify-between mb-1"><span>Fake Prob:</span><span class="font-bold text-white">{{ (report.knn_fake_prob * 100) | int }}%</span></div>
+                                <div class="h-1.5 bg-white/5 rounded-full overflow-hidden"><div class="h-full bg-error" style="width: {{ (report.knn_fake_prob * 100) | int }}%"></div></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-1"><span>Clone Prob:</span><span class="font-bold text-white">{{ (report.knn_clone_prob * 100) | int }}%</span></div>
+                                <div class="h-1.5 bg-white/5 rounded-full overflow-hidden"><div class="h-full bg-secondary" style="width: {{ (report.knn_clone_prob * 100) | int }}%"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile bio description -->
+            <div class="glass-panel p-6 flex flex-col gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 border border-primary-fixed/20 bg-primary-fixed/5 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary-fixed text-lg">feed</span>
+                    </div>
+                    <div>
+                        <div class="font-bold text-white font-mono text-xs">Profile Metadata Description</div>
+                        <div class="text-[10px] text-on-surface-variant/80 font-mono">Parsed Bio Content</div>
+                    </div>
+                </div>
+                {% set bio = "Social media profile logs. Sharing statements and network coordinates." %}
+                {% if report.bio and report.bio is string and report.bio | trim != "" and report.bio != "nan" and report.bio != "None" %}
+                    {% set bio = report.bio %}
+                {% endif %}
+                <div class="bg-surface-container-lowest/50 border border-outline-variant/10 p-4 font-mono text-xs leading-relaxed text-on-surface-variant/95">{{ bio }}</div>
+            </div>
+
+        </div>
+
     </div>
 </div>
 
-<div class="results-split-layout" style="display:flex;gap:1.75rem;width:100%;max-width:1100px;margin:0 auto 4rem;align-items:flex-start;">
-
-    <!-- LEFT PANEL -->
-    <div class="glass-panel" style="flex:0 0 240px;width:240px;padding:2rem 1.75rem;text-align:center;display:flex;flex-direction:column;align-items:center;gap:1rem;">
-
-        <!-- Risk Gauge -->
-        <div style="position:relative;width:160px;height:160px;display:flex;align-items:center;justify-content:center;">
-            <svg width="100%" height="100%" viewBox="0 0 100 100" style="transform:rotate(-90deg);">
-                <circle cx="50" cy="50" r="42" stroke="rgba(255,255,255,0.04)" stroke-width="8" fill="transparent"/>
-                <circle cx="50" cy="50" r="42"
-                    stroke="{% if report.combined_risk_score < 30 %}#10b981{% elif report.combined_risk_score < 60 %}#f59e0b{% else %}#ef4444{% endif %}"
-                    stroke-width="8" fill="transparent"
-                    stroke-dasharray="264"
-                    stroke-dashoffset="{{ 264 - (264 * report.combined_risk_score / 100) }}"
-                    style="transition:stroke-dashoffset 1.2s ease-out;"/>
-            </svg>
-            <div style="position:absolute;display:flex;flex-direction:column;align-items:center;">
-                <span style="font-size:2.2rem;font-weight:800;color:#fff;font-family:var(--font-mono);line-height:1;">{{ report.combined_risk_score | int }}%</span>
-                <span style="font-size:0.65rem;color:var(--text-muted);font-weight:600;letter-spacing:0.5px;">RISK</span>
-            </div>
+<!-- ================== REPORT MODAL ================== -->
+<div id="report-modal" class="modal-overlay hidden">
+    <div class="glass-panel p-8 w-full max-w-md border border-error/30 m-4 relative overflow-hidden">
+        <div class="scanline"></div>
+        <div class="flex items-center gap-2 mb-4 font-mono text-sm font-bold text-white uppercase tracking-wider">
+            <span class="material-symbols-outlined text-error">flag</span> Incident Flagging System
         </div>
-
-        <h2 style="font-size:1.35rem;font-weight:700;color:#fff;font-family:var(--font-mono);letter-spacing:-0.25px;">@{{ report.username }}</h2>
-
-        <!-- Classification pill -->
-        <div style="padding:0.6rem 1.25rem;border-radius:30px;font-weight:700;font-size:0.85rem;
-            background:{% if report.classification == 'Genuine' %}rgba(16,185,129,0.12){% elif report.classification == 'Fake' %}rgba(239,68,68,0.12){% else %}rgba(245,158,11,0.12){% endif %};
-            color:{% if report.classification == 'Genuine' %}#10b981{% elif report.classification == 'Fake' %}#ef4444{% else %}#f59e0b{% endif %};
-            border:1px solid {% if report.classification == 'Genuine' %}rgba(16,185,129,0.3){% elif report.classification == 'Fake' %}rgba(239,68,68,0.3){% else %}rgba(245,158,11,0.3){% endif %};">
-            <i class="fa-solid {% if report.classification == 'Genuine' %}fa-shield-check{% elif report.classification == 'Fake' %}fa-robot{% else %}fa-triangle-exclamation{% endif %}" style="margin-right:0.35rem;"></i>
-            {{ report.classification }} Account
-        </div>
-
-        <!-- Platform links -->
-        <div style="display:flex;flex-direction:column;gap:0.5rem;width:100%;">
-            <a href="https://instagram.com/{{ report.username }}" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:0.5rem;background:{% if report.platform=='instagram' %}rgba(225,48,108,0.2){% else %}rgba(255,255,255,0.03){% endif %};border:1px solid {% if report.platform=='instagram' %}rgba(225,48,108,0.4){% else %}rgba(255,255,255,0.06){% endif %};color:#fff;padding:0.55rem 1rem;border-radius:20px;font-size:0.8rem;font-weight:600;text-decoration:none;transition:all 0.2s;">
-                <i class="fa-brands fa-instagram" style="color:#e1306c;"></i> Instagram <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:0.65rem;opacity:0.5;"></i>
-            </a>
-            <a href="https://twitter.com/{{ report.username }}" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:0.5rem;background:{% if report.platform=='twitter' %}rgba(29,161,242,0.2){% else %}rgba(255,255,255,0.03){% endif %};border:1px solid {% if report.platform=='twitter' %}rgba(29,161,242,0.4){% else %}rgba(255,255,255,0.06){% endif %};color:#fff;padding:0.55rem 1rem;border-radius:20px;font-size:0.8rem;font-weight:600;text-decoration:none;transition:all 0.2s;">
-                <i class="fa-brands fa-twitter" style="color:#1da1f2;"></i> Twitter <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:0.65rem;opacity:0.5;"></i>
-            </a>
-            <a href="https://facebook.com/{{ report.username }}" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:0.5rem;background:{% if report.platform=='facebook' %}rgba(24,119,242,0.2){% else %}rgba(255,255,255,0.03){% endif %};border:1px solid {% if report.platform=='facebook' %}rgba(24,119,242,0.4){% else %}rgba(255,255,255,0.06){% endif %};color:#fff;padding:0.55rem 1rem;border-radius:20px;font-size:0.8rem;font-weight:600;text-decoration:none;transition:all 0.2s;">
-                <i class="fa-brands fa-facebook" style="color:#1877f2;"></i> Facebook <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:0.65rem;opacity:0.5;"></i>
-            </a>
-        </div>
-
-        <!-- Print/Download -->
-        <button onclick="window.print()" class="btn-print-report no-print">
-            <i class="fa-solid fa-file-arrow-down"></i> Download Report
-        </button>
-
-        <!-- Flag button -->
-        <button type="button" id="btn-report" class="btn-flag-profile no-print">
-            <i class="fa-solid fa-flag"></i> Flag This Account
-        </button>
-    </div>
-
-    <!-- RIGHT PANEL -->
-    <form action="/detect" method="POST" style="flex:1;display:flex;flex-direction:column;gap:1.25rem;min-width:0;">
-        <input type="hidden" name="username" value="{{ report.username }}">
-        <input type="hidden" name="platform" value="{{ report.platform }}">
-        <input type="hidden" name="manual_mode" value="true">
-
-        <!-- Scraper logs -->
-        {% if status_logs %}
-        <div class="glass-panel" style="padding:1rem 1.25rem;background:rgba(15,23,42,0.7);border:1px solid rgba(99,102,241,0.2);font-family:var(--font-code);font-size:0.75rem;color:#a78bfa;line-height:1.5;">
-            <div style="font-weight:700;color:#fff;margin-bottom:0.5rem;display:flex;align-items:center;gap:0.4rem;font-family:var(--font-mono);">
-                <i class="fa-solid fa-terminal" style="font-size:0.8rem;color:var(--primary);"></i> Live Scraper Connection Log
-            </div>
-            <div style="max-height:100px;overflow-y:auto;display:flex;flex-direction:column;gap:0.2rem;">
-                {% for log in status_logs %}
-                    <div><span style="color:rgba(255,255,255,0.3);">&gt; </span>{{ log }}</div>
-                {% endfor %}
-            </div>
-        </div>
-        {% endif %}
-
-        <!-- 4 Metric Cards -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-            <!-- Followers -->
-            <div class="glass-panel" style="padding:1.25rem 1rem;text-align:center;transition:border-color 0.25s;" onmouseover="this.style.borderColor='rgba(99,102,241,0.4)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.07)'">
-                {% if report.sources and report.sources.followers == 'live' %}
-                    <div style="font-size:0.65rem;color:#10b981;margin-bottom:0.25rem;font-weight:700;"><i class="fa-solid fa-circle-check"></i> SCRAPED LIVE</div>
-                {% else %}
-                    <div style="font-size:0.65rem;color:#f59e0b;margin-bottom:0.25rem;font-weight:700;"><i class="fa-solid fa-triangle-exclamation"></i> ESTIMATED</div>
-                {% endif %}
-                <input type="number" name="followers" value="{{ report.network_count }}" style="width:100%;background:transparent;border:none;border-bottom:1px dashed rgba(99,102,241,0.35);font-size:2rem;font-weight:800;color:var(--primary-light);text-align:center;font-family:var(--font-mono);outline:none;margin-bottom:0.35rem;" required>
-                <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.75px;font-weight:600;">Followers <i class="fa-solid fa-pen" style="font-size:0.6rem;opacity:0.4;margin-left:0.1rem;"></i></div>
-            </div>
-            <!-- Following -->
-            <div class="glass-panel" style="padding:1.25rem 1rem;text-align:center;transition:border-color 0.25s;" onmouseover="this.style.borderColor='rgba(99,102,241,0.4)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.07)'">
-                {% if report.sources and report.sources.following == 'live' %}
-                    <div style="font-size:0.65rem;color:#10b981;margin-bottom:0.25rem;font-weight:700;"><i class="fa-solid fa-circle-check"></i> SCRAPED LIVE</div>
-                {% else %}
-                    <div style="font-size:0.65rem;color:#f59e0b;margin-bottom:0.25rem;font-weight:700;"><i class="fa-solid fa-triangle-exclamation"></i> ESTIMATED</div>
-                {% endif %}
-                <input type="number" name="following" value="{{ report.following_count }}" style="width:100%;background:transparent;border:none;border-bottom:1px dashed rgba(99,102,241,0.35);font-size:2rem;font-weight:800;color:var(--primary-light);text-align:center;font-family:var(--font-mono);outline:none;margin-bottom:0.35rem;" required>
-                <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.75px;font-weight:600;">Following <i class="fa-solid fa-pen" style="font-size:0.6rem;opacity:0.4;margin-left:0.1rem;"></i></div>
-            </div>
-            <!-- Posts -->
-            <div class="glass-panel" style="padding:1.25rem 1rem;text-align:center;transition:border-color 0.25s;" onmouseover="this.style.borderColor='rgba(99,102,241,0.4)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.07)'">
-                {% if report.sources and report.sources.posts == 'live' %}
-                    <div style="font-size:0.65rem;color:#10b981;margin-bottom:0.25rem;font-weight:700;"><i class="fa-solid fa-circle-check"></i> SCRAPED LIVE</div>
-                {% else %}
-                    <div style="font-size:0.65rem;color:#f59e0b;margin-bottom:0.25rem;font-weight:700;"><i class="fa-solid fa-triangle-exclamation"></i> ESTIMATED</div>
-                {% endif %}
-                <input type="number" name="posts" value="{{ report.posts_count }}" style="width:100%;background:transparent;border:none;border-bottom:1px dashed rgba(99,102,241,0.35);font-size:2rem;font-weight:800;color:var(--primary-light);text-align:center;font-family:var(--font-mono);outline:none;margin-bottom:0.35rem;" required>
-                <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.75px;font-weight:600;">Posts <i class="fa-solid fa-pen" style="font-size:0.6rem;opacity:0.4;margin-left:0.1rem;"></i></div>
-            </div>
-            <!-- Account Age -->
-            <div class="glass-panel" style="padding:1.25rem 1rem;text-align:center;transition:border-color 0.25s;" onmouseover="this.style.borderColor='rgba(99,102,241,0.4)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.07)'">
-                {% if report.sources and report.sources.account_age == 'live' %}
-                    <div style="font-size:0.65rem;color:#10b981;margin-bottom:0.25rem;font-weight:700;"><i class="fa-solid fa-circle-check"></i> SCRAPED LIVE</div>
-                {% else %}
-                    <div style="font-size:0.65rem;color:#f59e0b;margin-bottom:0.25rem;font-weight:700;"><i class="fa-solid fa-triangle-exclamation"></i> ESTIMATED</div>
-                {% endif %}
-                <input type="number" step="0.01" name="account_age" value="{{ report.account_age | round(2) }}" style="width:100%;background:transparent;border:none;border-bottom:1px dashed rgba(99,102,241,0.35);font-size:2rem;font-weight:800;color:var(--primary-light);text-align:center;font-family:var(--font-mono);outline:none;margin-bottom:0.35rem;" required>
-                <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.75px;font-weight:600;">Account Age (y) <i class="fa-solid fa-pen" style="font-size:0.6rem;opacity:0.4;margin-left:0.1rem;"></i></div>
-                <div style="font-size:0.65rem;color:#6b7280;margin-top:0.4rem;line-height:1.35;padding:0 0.25rem;"><i class="fa-solid fa-circle-info" style="color:var(--primary);margin-right:2px;"></i> Tap <strong>...</strong> &rarr; <strong>About this account</strong> on Instagram for exact year</div>
-            </div>
-        </div>
-
-        <!-- AI Analysis Card -->
-        <div class="glass-panel" style="padding:1.75rem;background:rgba(15,23,42,0.5);">
-            <h4 style="margin-bottom:1.5rem;font-size:1rem;font-weight:700;color:#fff;font-family:var(--font-mono);display:flex;align-items:center;gap:0.5rem;">
-                <i class="fa-solid fa-microchip" style="color:var(--primary);"></i> Algorithm Analysis (3 Classifiers)
-            </h4>
-            <div style="display:flex;flex-direction:column;gap:1.25rem;">
-                <!-- RF -->
-                <div style="border-bottom:1px solid rgba(255,255,255,0.05);padding-bottom:1rem;">
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
-                        <span style="font-weight:700;font-size:0.875rem;color:#fff;">1. Random Forest (Bagging)</span>
-                        <span style="font-size:0.72rem;font-weight:700;padding:0.2rem 0.65rem;border-radius:20px;background:{% if report.rf_classification=='Genuine' %}rgba(16,185,129,0.12);color:#10b981;{% elif report.rf_classification=='Suspicious' %}rgba(245,158,11,0.12);color:#f59e0b;{% else %}rgba(239,68,68,0.12);color:#ef4444;{% endif %}">{{ report.rf_classification }}</span>
-                    </div>
-                    <div style="display:flex;gap:1rem;font-size:0.78rem;color:var(--text-muted);">
-                        <div style="flex:1;"><div style="display:flex;justify-content:space-between;margin-bottom:0.3rem;"><span>Fake Probability</span><span style="font-weight:700;">{{ (report.rf_fake_prob * 100) | int }}%</span></div><div style="height:4px;background:rgba(255,255,255,0.05);border-radius:2px;"><div style="width:{{ (report.rf_fake_prob * 100) | int }}%;height:100%;background:var(--danger);border-radius:2px;"></div></div></div>
-                        <div style="flex:1;"><div style="display:flex;justify-content:space-between;margin-bottom:0.3rem;"><span>Clone Probability</span><span style="font-weight:700;">{{ (report.rf_clone_prob * 100) | int }}%</span></div><div style="height:4px;background:rgba(255,255,255,0.05);border-radius:2px;"><div style="width:{{ (report.rf_clone_prob * 100) | int }}%;height:100%;background:var(--primary);border-radius:2px;"></div></div></div>
-                    </div>
-                </div>
-                <!-- XGB -->
-                <div style="border-bottom:1px solid rgba(255,255,255,0.05);padding-bottom:1rem;">
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
-                        <span style="font-weight:700;font-size:0.875rem;color:#fff;">2. XGBoost (Boosting)</span>
-                        <span style="font-size:0.72rem;font-weight:700;padding:0.2rem 0.65rem;border-radius:20px;background:{% if report.xgb_classification=='Genuine' %}rgba(16,185,129,0.12);color:#10b981;{% elif report.xgb_classification=='Suspicious' %}rgba(245,158,11,0.12);color:#f59e0b;{% else %}rgba(239,68,68,0.12);color:#ef4444;{% endif %}">{{ report.xgb_classification }}</span>
-                    </div>
-                    <div style="display:flex;gap:1rem;font-size:0.78rem;color:var(--text-muted);">
-                        <div style="flex:1;"><div style="display:flex;justify-content:space-between;margin-bottom:0.3rem;"><span>Fake Probability</span><span style="font-weight:700;">{{ (report.xgb_fake_prob * 100) | int }}%</span></div><div style="height:4px;background:rgba(255,255,255,0.05);border-radius:2px;"><div style="width:{{ (report.xgb_fake_prob * 100) | int }}%;height:100%;background:var(--danger);border-radius:2px;"></div></div></div>
-                        <div style="flex:1;"><div style="display:flex;justify-content:space-between;margin-bottom:0.3rem;"><span>Clone Probability</span><span style="font-weight:700;">{{ (report.xgb_clone_prob * 100) | int }}%</span></div><div style="height:4px;background:rgba(255,255,255,0.05);border-radius:2px;"><div style="width:{{ (report.xgb_clone_prob * 100) | int }}%;height:100%;background:var(--primary);border-radius:2px;"></div></div></div>
-                    </div>
-                </div>
-                <!-- KNN -->
-                <div>
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
-                        <span style="font-weight:700;font-size:0.875rem;color:#fff;">3. K-Nearest Neighbors (KNN)</span>
-                        <span style="font-size:0.72rem;font-weight:700;padding:0.2rem 0.65rem;border-radius:20px;background:{% if report.knn_classification=='Genuine' %}rgba(16,185,129,0.12);color:#10b981;{% elif report.knn_classification=='Suspicious' %}rgba(245,158,11,0.12);color:#f59e0b;{% else %}rgba(239,68,68,0.12);color:#ef4444;{% endif %}">{{ report.knn_classification }}</span>
-                    </div>
-                    <div style="display:flex;gap:1rem;font-size:0.78rem;color:var(--text-muted);">
-                        <div style="flex:1;"><div style="display:flex;justify-content:space-between;margin-bottom:0.3rem;"><span>Fake Probability</span><span style="font-weight:700;">{{ (report.knn_fake_prob * 100) | int }}%</span></div><div style="height:4px;background:rgba(255,255,255,0.05);border-radius:2px;"><div style="width:{{ (report.knn_fake_prob * 100) | int }}%;height:100%;background:var(--danger);border-radius:2px;"></div></div></div>
-                        <div style="flex:1;"><div style="display:flex;justify-content:space-between;margin-bottom:0.3rem;"><span>Clone Probability</span><span style="font-weight:700;">{{ (report.knn_clone_prob * 100) | int }}%</span></div><div style="height:4px;background:rgba(255,255,255,0.05);border-radius:2px;"><div style="width:{{ (report.knn_clone_prob * 100) | int }}%;height:100%;background:var(--primary);border-radius:2px;"></div></div></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Profile info -->
-        <div class="glass-panel" style="padding:1.5rem;display:flex;flex-direction:column;gap:1rem;">
-            <div style="display:flex;align-items:center;gap:0.75rem;">
-                <div style="width:40px;height:40px;border-radius:50%;background:rgba(99,102,241,0.15);display:flex;align-items:center;justify-content:center;border:1px solid rgba(99,102,241,0.25);">
-                    <i class="fa-solid fa-user" style="color:var(--primary);"></i>
-                </div>
-                <div>
-                    <div style="font-weight:700;color:#fff;font-size:1rem;">{{ report.display_name }}</div>
-                    <div style="font-size:0.75rem;color:var(--text-muted);">Profile Information</div>
-                </div>
-            </div>
-            {% set bio = "Social media enthusiast. Sharing updates and thoughts daily." %}
-            {% if report.bio and report.bio is string and report.bio | trim != "" and report.bio != "nan" and report.bio != "None" %}{% set bio = report.bio %}{% endif %}
-            <div style="padding:0.9rem;border-radius:10px;background:rgba(15,23,42,0.5);border:1px solid rgba(255,255,255,0.04);color:var(--text-muted);font-size:0.875rem;line-height:1.6;">{{ bio }}</div>
-        </div>
-
-        <!-- Clone Alert -->
-        {% if report.clone_target %}
-        <div class="glass-panel" style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.25);padding:1.25rem;display:flex;align-items:flex-start;gap:0.75rem;">
-            <i class="fa-solid fa-triangle-exclamation" style="color:var(--secondary);font-size:1.1rem;margin-top:2px;"></i>
-            <div>
-                <p style="font-weight:700;margin-bottom:0.25rem;color:#fff;">Impersonation Signature Detected</p>
-                <p style="font-size:0.85rem;color:var(--text-muted);line-height:1.5;">
-                    This profile matches <strong>@{{ report.clone_target.username }}</strong> with Levenshtein distance {{ report.clone_target.distance }}.<br>
-                    <span style="font-family:var(--font-code);font-size:0.78rem;color:var(--secondary);">Cosine Similarity: {{ report.clone_target.cosine_similarity }} | Euclidean: {{ report.clone_target.euclidean_distance }}</span>
-                </p>
-            </div>
-        </div>
-        {% endif %}
-
-        <!-- Actions row -->
-        <div style="display:flex;gap:0.75rem;align-items:center;">
-            <div class="glass-panel" style="flex:1;padding:0.6rem 1rem;display:flex;align-items:center;justify-content:space-between;font-size:0.85rem;color:var(--text-muted);">
-                <span>Profile Picture:</span>
-                <select name="profile_picture" style="background:rgba(15,23,42,0.8);border:1px solid rgba(255,255,255,0.1);color:#fff;border-radius:6px;padding:0.25rem 0.5rem;outline:none;cursor:pointer;font-family:var(--font-sans);">
-                    <option value="1" {% if report.profile_picture == 1 %}selected{% endif %}>Yes</option>
-                    <option value="0" {% if report.profile_picture == 0 %}selected{% endif %}>No</option>
-                </select>
-            </div>
-            <button type="submit" style="flex:1.5;display:flex;align-items:center;justify-content:center;gap:0.5rem;background:linear-gradient(135deg,var(--primary),var(--secondary));border:none;color:#fff;padding:0.75rem 1rem;font-size:0.875rem;font-weight:700;border-radius:12px;cursor:pointer;transition:all 0.3s;box-shadow:0 4px 16px var(--primary-glow);font-family:var(--font-sans);">
-                <i class="fa-solid fa-arrows-rotate"></i> Re-Analyze
-            </button>
-        </div>
-    </form>
-</div>
-
-<!-- Report Modal -->
-<div id="report-modal" class="modal-overlay">
-    <div class="glass-panel modal-content" style="background:rgba(10,15,28,0.98);">
-        <div class="modal-title"><i class="fa-solid fa-flag" style="color:var(--danger);"></i> Report Flagged Account</div>
-        <form id="report-form" class="modal-body">
+        <form id="report-form" class="space-y-4 font-mono text-xs text-on-surface-variant">
             <input type="hidden" id="report-username" value="{{ report.username }}">
             <input type="hidden" id="report-platform" value="{{ report.platform }}">
             <input type="hidden" id="report-score" value="{{ report.combined_risk_score }}">
-            <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1rem;">Reporting <strong>@{{ report.username }}</strong> on {{ report.platform | capitalize }} to the admin dashboard for review.</p>
-            <label for="report-reason">Reason for flagging</label>
-            <textarea id="report-reason" rows="4" class="modal-input" placeholder="e.g. Copies posts, sending spam links..." required></textarea>
-            <div class="modal-buttons">
-                <button type="button" id="btn-cancel-report" class="btn-cancel">Cancel</button>
-                <button type="submit" class="btn-submit">Submit Report</button>
+            
+            <p class="leading-relaxed">Initiating official incident logging for <strong class="text-white">@{{ report.username }}</strong> on {{ report.platform | capitalize }} to the administrative central dashboard.</p>
+            
+            <div>
+                <label for="report-reason" class="block font-bold text-white mb-1.5 uppercase">Anomalous Activity Reason</label>
+                <textarea id="report-reason" rows="4" class="w-full bg-black border border-outline-variant/20 p-3 text-white outline-none focus:border-error text-xs" placeholder="e.g. Identity clone, posting phishing coordinates, bot behavior patterns..." required></textarea>
+            </div>
+            
+            <div class="flex justify-end gap-2 pt-2">
+                <button type="button" id="btn-cancel-report" class="border border-white/10 bg-white/5 hover:bg-white/10 text-white font-mono text-xs px-4 py-2.5 transition-colors">CANCEL</button>
+                <button type="submit" class="bg-error hover:bg-error/90 text-black font-mono font-bold text-xs px-4 py-2.5 transition-colors">FLAG HANDLE</button>
             </div>
         </form>
     </div>
 </div>
 
 {% else %}
-<!-- LANDING PAGE -->
+<!-- ================== LANDING PAGE ================== -->
 
-<!-- Hero -->
-<section class="hero-section" id="home">
-    <div class="hero-eyebrow">
-        <span class="hero-eyebrow-dot"></span>
-        AI-Powered &bull; Real-Time &bull; Multi-Platform
+<!-- Hero Section -->
+<section class="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
+    <div class="absolute inset-0 z-0">
+        <div class="absolute inset-0 bg-black/80 z-10"></div>
+        <!-- Using the mysterious background design from Stitch -->
+        <img alt="Abstract digital network" class="w-full h-full object-cover grayscale opacity-30 scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAVoIcdzD3oNsN-A3i5bBUjK6EsQ5r5FKUix4fm2-FyskE21kLNKXa2Cn45SmPie6shyGWxVH6ZDTC3rVcAn45C_WuKKO92pmmtZl6oThSEwJZ7jWksgiZpsS5TmJ47I6u9suFYL1Wj-7Ff8g0jHcjrPOjYMTIggEb5GUDoOABNjgySOaeLyptFbjp5lssyYa-KeVwhJgMH_kz0OoG4hfWyOk7P_-rEMeGSuuf4eY83acE9uyMXwQbS"/>
     </div>
-    <h1 class="hero-headline">
-        Detect Fake &amp; Clone<br>
-        Accounts with <span class="gradient-text">Precision AI</span>
-    </h1>
-    <p class="hero-subtext">
-        SecureLock uses a 3-classifier ensemble model — Random Forest, XGBoost &amp; KNN — 
-        to identify fake profiles, bots, and cloned accounts across Instagram, Twitter, Facebook &amp; LinkedIn in seconds.
-    </p>
-    <div class="hero-actions">
-        <a href="#analyze" class="btn-primary-hero">
-            <i class="fa-solid fa-shield-halved"></i> Analyze an Account
-        </a>
-        <a href="#how-it-works" class="btn-secondary-hero">
-            <i class="fa-solid fa-play-circle"></i> See How It Works
-        </a>
-    </div>
-    <div class="trust-badges">
-        <div class="trust-badge"><i class="fa-solid fa-circle-check"></i> 99.8% Accuracy</div>
-        <div class="trust-badge"><i class="fa-solid fa-circle-check"></i> 8,300+ Accounts Analyzed</div>
-        <div class="trust-badge"><i class="fa-solid fa-circle-check"></i> Live Data Scraping</div>
-        <div class="trust-badge"><i class="fa-solid fa-circle-check"></i> 3 AI Classifiers</div>
-    </div>
-</section>
-
-<!-- Stats Counter -->
-<div class="stats-section glass-panel" style="border-radius:20px;padding:1.5rem;">
-    <div class="stat-counter-card">
-        <div class="stat-counter-val" data-target="8303">8,303</div>
-        <div class="stat-counter-label">Accounts in Database</div>
-    </div>
-    <div class="stat-counter-card">
-        <div class="stat-counter-val">99.8%</div>
-        <div class="stat-counter-label">Detection Accuracy</div>
-    </div>
-    <div class="stat-counter-card">
-        <div class="stat-counter-val">&lt;2s</div>
-        <div class="stat-counter-label">Avg Response Time</div>
-    </div>
-    <div class="stat-counter-card">
-        <div class="stat-counter-val">4</div>
-        <div class="stat-counter-label">Platforms Supported</div>
-    </div>
-</div>
-
-<!-- How It Works -->
-<section id="how-it-works" style="margin:5rem 0;">
-    <div class="section-header">
-        <span class="section-label">How It Works</span>
-        <h2 class="section-title">Three Steps to the Truth</h2>
-        <p class="section-desc">From username input to verified AI verdict — in under 2 seconds.</p>
-    </div>
-    <div class="steps-row">
-        <div class="glass-panel step-card">
-            <div class="step-number">STEP 01</div>
-            <div class="step-icon purple"><i class="fa-solid fa-magnifying-glass"></i></div>
-            <h3 class="step-title">Enter a Username</h3>
-            <p class="step-desc">Type any social media username. Select the platform — Instagram, Twitter, Facebook or LinkedIn — and hit Analyze.</p>
+    
+    <div class="relative z-20 w-full px-margin-mobile md:px-margin-desktop max-w-container-max text-center">
+        <div class="inline-block mb-6 px-4 py-1 border border-primary-fixed/30 bg-primary-fixed/5 font-mono text-[10px] text-primary-fixed uppercase tracking-[0.2em] font-bold">
+            Encryption Level: Tier 10 System
         </div>
-        <div class="glass-panel step-card">
-            <div class="step-number">STEP 02</div>
-            <div class="step-icon blue"><i class="fa-solid fa-satellite-dish"></i></div>
-            <h3 class="step-title">Live Data Scraped</h3>
-            <p class="step-desc">Our Googlebot-bypass scraper fetches real-time followers, following, posts, and account age directly from the platform.</p>
+        <h1 class="font-bold text-white text-4xl md:text-7xl leading-tight mb-6 tracking-tight">
+            They aren't who they <br/>
+            <span class="shimmer-text">say they are.</span>
+        </h1>
+        <p class="text-base md:text-lg text-on-surface-variant max-w-2xl mx-auto mb-10 leading-relaxed">
+            The digital mirror is cracked. We see what hides in the shards. SHADOW_PROTOCOL detects, identifies, and flags social synthetic threats in real-time.
+        </p>
+        
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-md mx-auto">
+            <a href="#analyze" class="w-full sm:w-auto bg-primary-fixed text-on-primary-fixed px-8 py-3.5 font-mono text-xs font-bold tracking-wider hover:shadow-[0_0_20px_rgba(171,214,0,0.4)] transition-all">
+                INITIATE SYSTEM AUDIT
+            </a>
+            <a href="#services" class="w-full sm:w-auto border border-outline-variant text-white px-8 py-3.5 font-mono text-xs font-bold hover:bg-white/5 transition-all">
+                VIEW OPERATIONS
+            </a>
         </div>
-        <div class="glass-panel step-card">
-            <div class="step-number">STEP 03</div>
-            <div class="step-icon cyan"><i class="fa-solid fa-microchip"></i></div>
-            <h3 class="step-title">AI Verdict Delivered</h3>
-            <p class="step-desc">Three independent classifiers — Random Forest, XGBoost, and KNN — vote on the account's authenticity to produce a final risk score.</p>
-        </div>
-    </div>
-</section>
-
-<!-- Features -->
-<section id="features" style="margin:0 0 5rem;">
-    <div class="section-header">
-        <span class="section-label">Features</span>
-        <h2 class="section-title">Enterprise-Grade Detection</h2>
-        <p class="section-desc">Built with real ML research, live scraping, and a production-ready admin dashboard.</p>
-    </div>
-    <div class="features-grid">
-        <div class="glass-panel feature-card">
-            <div class="feature-icon" style="background:rgba(99,102,241,0.15);color:#818cf8;"><i class="fa-solid fa-robot"></i></div>
-            <h4 class="feature-title">Ensemble AI Model</h4>
-            <p class="feature-desc">3-classifier voting system (RF + XGBoost + KNN) trained on 50,000 labelled accounts for maximum accuracy.</p>
-        </div>
-        <div class="glass-panel feature-card">
-            <div class="feature-icon" style="background:rgba(6,182,212,0.15);color:#22d3ee;"><i class="fa-solid fa-satellite-dish"></i></div>
-            <h4 class="feature-title">Live Scraping Engine</h4>
-            <p class="feature-desc">Googlebot User-Agent bypass fetches real-time profile data — no API key or login required.</p>
-        </div>
-        <div class="glass-panel feature-card">
-            <div class="feature-icon" style="background:rgba(236,72,153,0.15);color:#f472b6;"><i class="fa-solid fa-copy"></i></div>
-            <h4 class="feature-title">Clone Detection</h4>
-            <p class="feature-desc">Levenshtein distance, cosine similarity &amp; Euclidean metrics pinpoint impersonation accounts targeting real users.</p>
-        </div>
-        <div class="glass-panel feature-card">
-            <div class="feature-icon" style="background:rgba(16,185,129,0.15);color:#34d399;"><i class="fa-solid fa-chart-line"></i></div>
-            <h4 class="feature-title">Admin Analytics</h4>
-            <p class="feature-desc">Real-time dashboard with charts, flagged account tables, platform distributions, and detection logs.</p>
-        </div>
-        <div class="glass-panel feature-card">
-            <div class="feature-icon" style="background:rgba(245,158,11,0.15);color:#fbbf24;"><i class="fa-solid fa-file-arrow-down"></i></div>
-            <h4 class="feature-title">PDF Reports</h4>
-            <p class="feature-desc">Download full analysis reports with risk scores, classifier outputs, and profile intelligence in one click.</p>
-        </div>
-        <div class="glass-panel feature-card">
-            <div class="feature-icon" style="background:rgba(139,92,246,0.15);color:#a78bfa;"><i class="fa-solid fa-sliders"></i></div>
-            <h4 class="feature-title">Manual Override</h4>
-            <p class="feature-desc">Edit any metric — followers, following, posts, or account age — and instantly re-analyze with updated data.</p>
-        </div>
-    </div>
-</section>
-
-<!-- Analyze Section -->
-<section id="analyze" style="margin:0 0 5rem;">
-    <div class="section-header">
-        <span class="section-label">Free Analysis</span>
-        <h2 class="section-title">Check Any Account Now</h2>
-        <p class="section-desc">Enter a username, select the platform, and get an instant AI-powered authenticity report.</p>
-    </div>
-
-    <div class="search-wrapper" style="max-width:780px;margin:0 auto;">
-        <form id="search-form" action="/detect" method="POST">
-            <div class="search-bar-container">
-                <div style="position:relative;flex:2 1 0%;min-width:0;display:flex;align-items:center;">
-                    <i class="fa-solid fa-magnifying-glass" style="position:absolute;left:1.25rem;color:var(--text-muted);font-size:0.9rem;pointer-events:none;z-index:2;"></i>
-                    <input type="text" id="search-input" name="username" class="input-custom-flat" placeholder="Enter username (e.g. elonmusk)" required autocomplete="off" style="width:100%;padding:0.75rem 1rem 0.75rem 2.75rem;min-height:44px;">
+        
+        <!-- Live Terminal logs Simulator -->
+        <div class="mt-16 max-w-2xl mx-auto glass-panel p-1 relative overflow-hidden text-left shadow-2xl border-outline-variant/30">
+            <div class="scanline"></div>
+            <div class="flex items-center gap-2 px-4 py-2.5 border-b border-outline-variant/15 bg-surface-container-low/40">
+                <div class="flex gap-1.5">
+                    <div class="w-2.5 h-2.5 rounded-full bg-error/50"></div>
+                    <div class="w-2.5 h-2.5 rounded-full bg-primary-fixed/50"></div>
+                    <div class="w-2.5 h-2.5 rounded-full bg-secondary/50"></div>
                 </div>
-                <div style="width:1px;height:28px;background:rgba(255,255,255,0.12);flex:0 0 auto;"></div>
-                <div style="position:relative;flex:1.5 1 0%;min-width:0;display:flex;align-items:center;">
-                    <i class="fa-solid fa-circle-user" style="position:absolute;left:1rem;color:var(--text-muted);font-size:0.9rem;pointer-events:none;z-index:2;"></i>
-                    <input type="text" id="ref-input" name="reference_username" class="input-custom-flat" placeholder="Reference (optional)" autocomplete="off" style="width:100%;padding:0.75rem 1rem 0.75rem 2.25rem;min-height:44px;">
-                </div>
-                <input type="hidden" id="platform-input" name="platform" value="twitter">
-                <button type="submit" class="btn-initialize" style="flex:0 0 160px;width:160px;">
-                    <i class="fa-solid fa-shield-halved"></i> <span>Analyze</span>
-                    <i class="fa-solid fa-circle-notch fa-spin" style="display:none;" id="spin-icon"></i>
-                </button>
+                <span class="font-mono text-[9px] text-on-surface-variant/80 ml-3 uppercase tracking-widest font-bold">Live Detection Terminal v4.2.0</span>
             </div>
+            <div class="h-44 overflow-y-auto p-4 bg-surface-container-lowest/80 text-[10px]" id="terminal-content">
+                <!-- Javascript will inject animated log feeds -->
+            </div>
+        </div>
+    </div>
+</section>
 
-            <div class="platform-tabs">
-                <button type="button" class="platform-btn active" data-platform="twitter"><i class="fa-brands fa-twitter" style="color:#1da1f2;"></i> Twitter</button>
-                <button type="button" class="platform-btn" data-platform="instagram"><i class="fa-brands fa-instagram" style="color:#e1306c;"></i> Instagram</button>
-                <button type="button" class="platform-btn" data-platform="facebook"><i class="fa-brands fa-facebook" style="color:#1877f2;"></i> Facebook</button>
-                <button type="button" class="platform-btn" data-platform="linkedin"><i class="fa-brands fa-linkedin-in" style="color:#0a66c2;"></i> LinkedIn</button>
+<!-- Core Operations Bento Grid Section -->
+<section id="services" class="py-24 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto border-t border-outline-variant/10">
+    <div class="mb-16 text-center">
+        <span class="inline-block px-3 py-1 bg-white/5 border border-white/10 font-mono text-[10px] text-primary-fixed font-bold uppercase tracking-wider mb-2">OPERATIONS INDEX</span>
+        <h2 class="text-2xl md:text-3xl font-extrabold text-white tracking-tight">CORE TACTICAL THREAT MITIGATION</h2>
+        <p class="text-xs text-on-surface-variant/80 mt-1 uppercase font-mono tracking-wider">Defense mechanisms engineered for the modern social battlefield.</p>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+        <!-- Service 1: Clone Impersonations -->
+        <div class="md:col-span-8 group relative glass-panel p-8 md:p-10 overflow-hidden min-h-[350px] flex flex-col justify-end">
+            <div class="scanline"></div>
+            <div class="absolute top-8 right-8 opacity-5 group-hover:opacity-10 transition-opacity">
+                <span class="material-symbols-outlined text-[140px] text-secondary">masks</span>
             </div>
-        </form>
+            <h3 class="font-mono text-lg font-bold text-secondary mb-3 relative z-10">Clone Neutralization</h3>
+            <p class="text-sm text-on-surface-variant leading-relaxed max-w-md relative z-10 mb-6">
+                Automated identification protocols. We isolate synthetic replication patterns and flag impersonations on the admin moderation tables within seconds.
+            </p>
+            <a href="#analyze" class="font-mono text-xs font-bold text-secondary flex items-center gap-1 group-hover:translate-x-1.5 transition-transform">
+                DECRYPT METHODOLOGY <span class="material-symbols-outlined text-xs">arrow_forward</span>
+            </a>
+            <div class="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-secondary to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        </div>
+
+        <!-- Service 2: Identity Shielding -->
+        <div class="md:col-span-4 group relative glass-panel p-8 overflow-hidden flex flex-col items-center text-center justify-center">
+            <div class="scanline"></div>
+            <div class="w-16 h-16 rounded-full border border-primary-fixed/20 flex items-center justify-center mb-6 bg-primary-fixed/5 group-hover:bg-primary-fixed/20 transition-all shadow-lime-glow">
+                <span class="material-symbols-outlined text-primary-fixed text-2xl" style="font-variation-settings: 'FILL' 1;">shield_person</span>
+            </div>
+            <h3 class="font-mono text-sm font-bold text-white mb-2 uppercase">Identity Shielding</h3>
+            <p class="font-mono text-[10px] text-on-surface-variant/80 leading-relaxed uppercase tracking-wider">Social footprint masking. Cloak your digital network coordinates from scraping bots.</p>
+        </div>
+
+        <!-- Service 3: Signal Intel -->
+        <div class="md:col-span-12 group relative glass-panel p-8 md:p-10 overflow-hidden min-h-[250px] flex items-center bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]">
+            <div class="scanline"></div>
+            <div class="grid md:grid-cols-2 gap-8 items-center w-full">
+                <div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="px-2 py-0.5 bg-tertiary-fixed text-on-tertiary-fixed font-mono text-[9px] font-bold tracking-widest uppercase">AI MODEL ENSEMBLE</span>
+                        <span class="text-tertiary-fixed font-mono text-[10px] font-bold">v9.0_OMEGA</span>
+                    </div>
+                    <h3 class="font-mono text-lg font-bold text-white mb-3">Signal Intelligence</h3>
+                    <p class="text-xs text-on-surface-variant leading-relaxed">
+                        Deep feature-ratio audits. AI-driven profile metrics scanning maps standard, fake, and cloned profiles against established baselines in our training set.
+                    </p>
+                </div>
+                <div class="relative h-32 bg-surface-container-low border border-outline-variant/20 rounded overflow-hidden p-4 flex items-end justify-between">
+                    <!-- Graph bars simulator -->
+                    <div class="w-1/6 bg-primary-fixed/25 h-[40%] animate-pulse"></div>
+                    <div class="w-1/6 bg-primary-fixed/50 h-[80%] animate-pulse" style="animation-delay: 0.1s"></div>
+                    <div class="w-1/6 bg-primary-fixed/35 h-[55%] animate-pulse" style="animation-delay: 0.2s"></div>
+                    <div class="w-1/6 bg-primary-fixed/70 h-[95%] animate-pulse" style="animation-delay: 0.3s"></div>
+                    <div class="w-1/6 bg-primary-fixed/30 h-[60%] animate-pulse" style="animation-delay: 0.4s"></div>
+                    <div class="w-1/6 bg-primary-fixed/15 h-[30%] animate-pulse" style="animation-delay: 0.5s"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Audit Interaction Section -->
+<section id="analyze" class="py-24 relative border-t border-outline-variant/10">
+    <div class="absolute inset-0 bg-surface-container-lowest/30 z-0"></div>
+    <div class="relative z-10 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto text-center">
+        <span class="material-symbols-outlined text-primary-fixed text-5xl mb-4">search</span>
+        <h2 class="font-bold text-white text-3xl md:text-4xl mb-2 tracking-tight">IS YOUR SYSTEM NODE SECURE?</h2>
+        <p class="text-sm text-on-surface-variant/80 font-mono uppercase mb-12">DECRYPT PROFILE VERDICTS IN UNDER 2 SECONDS</p>
+        
+        <!-- Search form input -->
+        <div class="max-w-2xl mx-auto relative group">
+            <form id="search-form" action="/detect" method="POST">
+                <div class="flex flex-col md:flex-row items-stretch border-b border-primary-fixed/40 bg-black/80 shadow-[0_0_30px_rgba(0,0,0,0.8)] relative z-10">
+                    <div class="relative flex-1 flex items-center">
+                        <span class="material-symbols-outlined text-on-surface-variant text-lg absolute left-4 pointer-events-none">alternate_email</span>
+                        <input type="text" id="search-input" name="username" class="w-full bg-transparent border-0 py-5 pl-11 pr-4 text-sm font-mono text-white placeholder:text-on-surface-variant/50 focus:ring-0 focus:border-0" placeholder="username_to_verify" required autocomplete="off">
+                    </div>
+                    <input type="hidden" id="platform-input" name="platform" value="twitter">
+                    <button type="submit" class="bg-primary-fixed hover:bg-primary-fixed/95 text-on-primary-fixed font-mono text-xs font-bold uppercase tracking-widest px-8 py-5 transition-colors btn-initialize flex items-center justify-center gap-2">
+                        <span>SCAN HANDLE</span>
+                        <i class="fa-solid fa-circle-notch fa-spin hidden" id="spin-icon"></i>
+                    </button>
+                </div>
+                
+                <!-- Platform selection tab rows -->
+                <div class="mt-4 flex flex-wrap gap-2 justify-center">
+                    <button type="button" class="platform-btn active px-4 py-2 border border-primary-fixed/60 bg-primary-fixed/10 text-primary-fixed font-mono text-[10px] font-bold uppercase tracking-wider rounded-sm flex items-center gap-1.5" data-platform="twitter">
+                        <i class="fa-brands fa-twitter"></i> Twitter
+                    </button>
+                    <button type="button" class="platform-btn px-4 py-2 border border-white/5 bg-white/5 text-on-surface-variant font-mono text-[10px] font-bold uppercase tracking-wider rounded-sm flex items-center gap-1.5" data-platform="instagram">
+                        <i class="fa-brands fa-instagram"></i> Instagram
+                    </button>
+                    <button type="button" class="platform-btn px-4 py-2 border border-white/5 bg-white/5 text-on-surface-variant font-mono text-[10px] font-bold uppercase tracking-wider rounded-sm flex items-center gap-1.5" data-platform="facebook">
+                        <i class="fa-brands fa-facebook"></i> Facebook
+                    </button>
+                    <button type="button" class="platform-btn px-4 py-2 border border-white/5 bg-white/5 text-on-surface-variant font-mono text-[10px] font-bold uppercase tracking-wider rounded-sm flex items-center gap-1.5" data-platform="linkedin">
+                        <i class="fa-brands fa-linkedin-in"></i> LinkedIn
+                    </button>
+                </div>
+            </form>
+            
+            <div class="absolute -inset-1.5 bg-primary-fixed/10 blur opacity-0 group-focus-within:opacity-100 transition-opacity pointer-events-none z-0"></div>
+        </div>
 
         {% if suggestions %}
-        <div class="suggestions-box">
-            <span>Try:</span>
-            {% for name in suggestions[:5] %}
-                {% set plat = 'twitter' %}{% if loop.index0 % 3 == 1 %}{% set plat = 'instagram' %}{% elif loop.index0 % 3 == 2 %}{% set plat = 'facebook' %}{% endif %}
-                <div class="suggestion-chip" data-username="{{ name }}" data-platform="{{ plat }}">@{{ name }}</div>
+        <div class="mt-12 flex justify-center items-center gap-3 flex-wrap">
+            <span class="font-mono text-[10px] text-on-surface-variant uppercase">Incident Seeds:</span>
+            {% for name in suggestions[:6] %}
+                {% set plat = 'twitter' %}
+                {% if loop.index0 % 3 == 1 %}
+                    {% set plat = 'instagram' %}
+                {% elif loop.index0 % 3 == 2 %}
+                    {% set plat = 'facebook' %}
+                {% endif %}
+                <button type="button" class="suggestion-chip font-mono text-[10px] px-3 py-1.5 bg-surface-container border border-outline-variant/10 text-primary-fixed hover:text-white hover:border-primary-fixed/40 transition-colors" data-username="{{ name }}" data-platform="{{ plat }}">@{{ name }}</button>
             {% endfor %}
         </div>
         {% endif %}
+
+        <div class="mt-12 flex justify-center gap-8 flex-wrap opacity-50 font-mono text-[10px] text-on-surface-variant">
+            <div class="flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-xs">verified_user</span> 100% ANONYMITY SHIELD
+            </div>
+            <div class="flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-xs">vpn_key</span> ZERO-KNOWLEDGE AUDITS
+            </div>
+            <div class="flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-xs">speed</span> 2.4s AVG RESPONSE LATENCY
+            </div>
+        </div>
     </div>
 </section>
 
-<!-- Services -->
-<section class="services-section" id="services">
-    <h2 class="services-title">Our Services</h2>
-    <div class="services-grid">
-        <div class="glass-panel service-card">
-            <div class="service-icon-box"><i class="fa-solid fa-magnifying-glass"></i></div>
-            <h3>Fake Account Detection</h3>
-            <p>Identify and flag fake accounts using advanced ensemble AI algorithms and behavioral pattern analysis.</p>
+<!-- Core Services list grid -->
+<section class="py-24 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto border-t border-outline-variant/10">
+    <h2 class="font-mono text-center text-sm font-bold text-white uppercase tracking-wider mb-12">SYSTEM PROTOCOLS DEPLOYED</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="glass-panel p-6 flex flex-col gap-4 text-center items-center">
+            <div class="w-12 h-12 border border-outline-variant/20 bg-surface-container flex items-center justify-center text-secondary">
+                <span class="material-symbols-outlined">psychology</span>
+            </div>
+            <h3 class="font-mono text-xs font-bold text-white uppercase">Fake Node Isolation</h3>
+            <p class="text-xs text-on-surface-variant leading-relaxed">Cross-validates behavioral profile patterns against 50,000 labelled bot accounts.</p>
         </div>
-        <div class="glass-panel service-card">
-            <div class="service-icon-box"><i class="fa-solid fa-copy"></i></div>
-            <h3>Clone Account Detection</h3>
-            <p>Detect cloned and impersonation accounts by comparing username similarity, profiles, and behavioral data.</p>
+        <div class="glass-panel p-6 flex flex-col gap-4 text-center items-center">
+            <div class="w-12 h-12 border border-outline-variant/20 bg-surface-container flex items-center justify-center text-primary-fixed">
+                <span class="material-symbols-outlined">content_copy</span>
+            </div>
+            <h3 class="font-mono text-xs font-bold text-white uppercase">Clone Detection</h3>
+            <p class="text-xs text-on-surface-variant leading-relaxed">Measures name distances, profile ratios, and text cosine distances to trace identity replicas.</p>
         </div>
-        <div class="glass-panel service-card">
-            <div class="service-icon-box"><i class="fa-solid fa-shield-halved"></i></div>
-            <h3>Account Security</h3>
-            <p>Enhance your social media security with real-time monitoring, threat detection, and admin alerts.</p>
+        <div class="glass-panel p-6 flex flex-col gap-4 text-center items-center">
+            <div class="w-12 h-12 border border-outline-variant/20 bg-surface-container flex items-center justify-center text-tertiary-fixed">
+                <span class="material-symbols-outlined">policy</span>
+            </div>
+            <h3 class="font-mono text-xs font-bold text-white uppercase">Real-Time Scraper</h3>
+            <p class="text-xs text-on-surface-variant leading-relaxed"> Googlebot-bypass scraper pulls followers and posts in real-time without credentials.</p>
         </div>
-        <div class="glass-panel service-card">
-            <div class="service-icon-box"><i class="fa-solid fa-chart-column"></i></div>
-            <h3>Analytics &amp; Reporting</h3>
-            <p>Get detailed reports, downloadable PDFs, and live admin analytics on all detected fake and clone accounts.</p>
+        <div class="glass-panel p-6 flex flex-col gap-4 text-center items-center">
+            <div class="w-12 h-12 border border-outline-variant/20 bg-surface-container flex items-center justify-center text-error">
+                <span class="material-symbols-outlined">bar_chart</span>
+            </div>
+            <h3 class="font-mono text-xs font-bold text-white uppercase">Admin Analytics</h3>
+            <p class="text-xs text-on-surface-variant leading-relaxed">Central security incident ledger tracking classifications, maps, and logs history.</p>
         </div>
     </div>
 </section>
+
 {% endif %}
 {% endblock %}

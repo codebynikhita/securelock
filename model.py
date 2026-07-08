@@ -141,7 +141,8 @@ class SecureLockModel:
             'is_new_and_aggressive',
             'account_age',
             'profile_picture',
-            'post_frequency'
+            'post_frequency',
+            'content_similarity'
         ]
         
         # Baseline: Predict with all features set to their average (scaled = 0)
@@ -213,6 +214,9 @@ class SecureLockModel:
                 age_days = float(raw_features.get('account_age', 0.01))
                 post_frequency = posts / (age_days + 1)
                 desc = f"Post frequency ({post_frequency:.2f}/day)"
+            elif feat == 'content_similarity':
+                similarity = float(raw_features.get('content_similarity', 0.0))
+                desc = f"Content similarity to known accounts ({similarity*100:.1f}%)"
                 
             explanations.append({
                 'feature': feat,
@@ -278,7 +282,8 @@ class SecureLockModel:
             'is_new_and_aggressive': is_new_and_aggressive,
             'account_age': age_years,
             'profile_picture': profile_picture,
-            'post_frequency': post_frequency
+            'post_frequency': post_frequency,
+            'content_similarity': float(raw_features.get('content_similarity', 0.1))
         }])
         
         # Scale features

@@ -2,9 +2,9 @@ import os
 import joblib
 import pandas as pd
 import numpy as np
+import re
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
-from model_def import XGBClassifier
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, 'data')
@@ -32,10 +32,6 @@ def run_verification():
     }
     df.rename(columns={k: v for k, v in rename_map.items() if k in df.columns}, inplace=True)
     
-    # Scale account age from days to years if they are large numbers (days)
-    if df['account_age'].max() > 100:
-        df['account_age'] = df['account_age'] / 365.0
-        
     # Ensure platform column exists
     if 'platform' not in df.columns:
         np.random.seed(42)
@@ -55,7 +51,7 @@ def run_verification():
                 'username': f'user_fake_{i}',
                 'display_name': f'Suspicious User {i}',
                 'profile_picture': 0 if np.random.rand() < 0.65 else 1,
-                'account_age': round(np.random.uniform(0.01, 1.2), 2),
+                'account_age': round(np.random.uniform(1, 400), 2),
                 'posts_count': int(np.random.uniform(0, 200)),
                 'network_count': int(np.random.uniform(0, 100)),
                 'following_count': int(np.random.uniform(800, 8000)),
@@ -71,22 +67,50 @@ def run_verification():
         df_fake = pd.DataFrame(fake_records)
         df = pd.concat([df, df_fake], ignore_index=True)
         
-    # Feature Engineering
+    # Keep age in days for frequency/aggressive checks
+    age_days = df['account_age'].copy()
+    # If account_age is already in years (unlikely in raw accounts.csv, but check just in case)
+    if age_days.max() < 100:
+        age_days = age_days * 365.0
+        
+    # Convert account age to years
+    df['account_age'] = (age_days / 365.0).clip(lower=0.001)
+        
+    # Feature Engineering matching training/prediction pipeline
     df['network_following_ratio'] = df['network_count'] / (df['following_count'] + 1)
-    df['post_frequency'] = df['posts_count'] / (df['account_age'] * 365 + 1)
+    
+    df['username_digit_ratio'] = df['username'].apply(
+        lambda u: sum(c.isdigit() for c in str(u)) / len(str(u)) if len(str(u)) > 0 else 0
+    )
+    df['username_has_trailing_digits'] = df['username'].apply(
+        lambda u: 1 if re.search(r'\d{4,}$', str(u)) else 0
+    )
+    
+    bio_present = df['bio'].fillna('').apply(lambda b: 1 if len(str(b).strip()) > 0 else 0)
+    df['profile_completeness'] = df['profile_picture'] + bio_present + (df['posts_count'] > 0).astype(int)
+    
+    df['is_new_and_aggressive'] = (
+        (age_days < 30) & 
+        ((df['posts_count'] > 300) | (df['following_count'] > 1000))
+    ).astype(int)
+    
+    df['post_frequency'] = df['posts_count'] / (age_days + 1)
+    
+    df['content_similarity'] = df['content_similarity'].fillna(0.1)
     
     feature_cols = [
         'network_following_ratio',
+        'username_digit_ratio',
+        'username_has_trailing_digits',
+        'profile_completeness',
+        'is_new_and_aggressive',
         'account_age',
         'profile_picture',
         'post_frequency',
-        'content_similarity',
-        'duplicate_posts',
-        'posts_count',
-        'following_count'
+        'content_similarity'
     ]
     
-    # 2. Split
+    # 2. Split (must match the model_pipeline.py random split to get test_df)
     train_df, test_df = train_test_split(df, test_size=0.2, random_state=42)
     
     # 3. Load scaler and models

@@ -5,8 +5,15 @@ document.addEventListener('DOMContentLoaded', () => {
     
     platformBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-            platformBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+            platformBtns.forEach(b => {
+                b.classList.remove('active', 'border-primary-container/60', 'bg-primary-container/10', 'text-primary-container');
+                b.classList.add('border-white/5', 'bg-white/5', 'text-on-surface-variant');
+            });
+            
+            // Add active styles to clicked button
+            btn.classList.add('active', 'border-primary-container/60', 'bg-primary-container/10', 'text-primary-container');
+            btn.classList.remove('border-white/5', 'bg-white/5', 'text-on-surface-variant');
+            
             if (platformInput) {
                 platformInput.value = btn.getAttribute('data-platform');
             }
@@ -26,6 +33,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const plat = chip.getAttribute('data-platform');
             if (plat && platformInput) {
                 platformInput.value = plat;
+                
+                // Also trigger click on matching platform button to sync UI state
+                const targetBtn = document.querySelector(`.platform-btn[data-platform="${plat}"]`);
+                if (targetBtn) {
+                    targetBtn.click();
+                }
             }
             if (searchForm) {
                 searchForm.dispatchEvent(new Event('submit'));
@@ -43,17 +56,17 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             const submitBtn = searchForm.querySelector('.btn-initialize');
             if (submitBtn) {
-                submitBtn.style.opacity = '0.85';
-                submitBtn.querySelector('span').textContent = 'SCANNING PROFILE...';
+                submitBtn.style.opacity = '0.8';
+                const labelText = submitBtn.querySelector('span');
+                if (labelText) labelText.textContent = 'SCRANNING HANDLE...';
             }
         });
     }
     
-    // Threat Score Progress Bar Animation
+    // Threat Score Progress Bar Animation (uses data-score attribute)
     const threatBar = document.querySelector('.threat-progress-bar-fill');
     if (threatBar) {
-        const score = threatBar.parentElement.previousElementSibling.querySelector('.threat-value').textContent;
-        // Set width dynamically to trigger transition animation
+        const score = threatBar.getAttribute('data-score') || '0%';
         threatBar.style.width = '0%';
         setTimeout(() => {
             threatBar.style.width = score;
@@ -68,6 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (btnReport && reportModal) {
         btnReport.addEventListener('click', () => {
+            reportModal.classList.remove('hidden');
             reportModal.style.display = 'flex';
         });
     }
@@ -117,5 +131,50 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('An error occurred. Please try again.');
             });
         });
+    }
+
+    // Terminal widget live log simulation
+    const terminalContent = document.getElementById('terminal-content');
+    if (terminalContent) {
+        const logs = [
+            { text: "[INFO] Initializing SECURELOCK Core Engine v4.2...", type: "info" },
+            { text: "[LOAD] Loading XGBoost Precision Impersonation classifier...", type: "info" },
+            { text: "[LOAD] Loading Random Forest High-Recall Ensemble voting node...", type: "info" },
+            { text: "[LOAD] Loading K-Nearest Neighbors 2D spatial anomaly mapper...", type: "info" },
+            { text: "[SCAN] Social integrity network thread bypass ready.", type: "success" },
+            { text: "[ALERT] Direct scraping redirects detected on Twitter. Switching to lite DDG cache search bypass.", type: "warning" },
+            { text: "[INFO] Standby for target handles query...", type: "info" },
+            { text: "[ALERT] Impersonation anomaly caught in database matching: ID 895737", type: "error" },
+            { text: "[ACTION] Logging metrics signature to SQLITE logs...", type: "success" },
+            { text: "[SCAN] Instagram Googlebot query bypass: Active.", type: "info" },
+            { text: "[SUCCESS] Integrity defense shielding active on all ports.", type: "success" }
+        ];
+
+        let index = 0;
+        function addLog() {
+            const log = logs[index % logs.length];
+            const div = document.createElement('div');
+            div.className = "flex gap-2 py-0.5 leading-relaxed font-mono";
+            
+            let colorClass = "text-on-surface-variant/70";
+            if (log.type === "error") colorClass = "text-error";
+            if (log.type === "warning") colorClass = "text-secondary-fixed-dim";
+            if (log.type === "success") colorClass = "text-primary-fixed";
+
+            const timestamp = new Date().toISOString().slice(11, 19) + "." + Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+            div.innerHTML = `<span class="text-white/20 select-none">${timestamp}</span><span class="${colorClass}">${log.text}</span>`;
+            
+            terminalContent.appendChild(div);
+            terminalContent.scrollTop = terminalContent.scrollHeight;
+            
+            // Keep terminal clean, trim oldest logs
+            if (terminalContent.children.length > 50) {
+                terminalContent.removeChild(terminalContent.firstChild);
+            }
+            
+            index++;
+            setTimeout(addLog, Math.random() * 1800 + 400);
+        }
+        addLog();
     }
 });

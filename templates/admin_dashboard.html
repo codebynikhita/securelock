@@ -1,198 +1,229 @@
 {% extends 'base.html' %}
 
-{% block title %}Admin Dashboard - SecureLock{% endblock %}
+{% block title %}Admin Dashboard - SHADOW_PROTOCOL{% endblock %}
 
 {% block content %}
-<div style="margin: 2rem 0; display: flex; justify-content: space-between; align-items: center;">
-    <div>
-        <h2 style="font-size: 1.8rem; font-weight: 800;">Administrative Dashboard</h2>
-        <p style="color: var(--text-muted); font-size: 0.95rem;">Real-time classification analytics and reported incident moderation portal.</p>
-    </div>
-    <div style="display: flex; gap: 0.5rem; align-items: center; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-card); border-radius: 30px; padding: 0.4rem 1.25rem; font-family: var(--font-mono); font-size: 0.85rem;">
-        <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--success); box-shadow: 0 0 10px var(--success);"></span>
-        <span>SecureLock Core Online</span>
-    </div>
-</div>
+<div class="relative min-h-screen py-10 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto cyber-grid">
 
-<!-- Admin Stats Summary cards -->
-<div class="admin-stats-summary">
-    <div class="glass-panel sys-stat-card" style="padding: 1.25rem;">
-        <div class="sys-stat-val" style="font-size: 1.75rem;">{{ stats.total_searches }}</div>
-        <div class="sys-stat-lbl" style="font-size: 0.75rem;">Total System Queries</div>
-    </div>
-    <div class="glass-panel sys-stat-card" style="padding: 1.25rem;">
-        <div class="sys-stat-val" style="font-size: 1.75rem; color: var(--danger);">{{ stats.total_reported }}</div>
-        <div class="sys-stat-lbl" style="font-size: 0.75rem;">Reported Incidents</div>
-    </div>
-    <div class="glass-panel sys-stat-card" style="padding: 1.25rem;">
-        <div class="sys-stat-val" style="font-size: 1.75rem; color: var(--warning);">
-            {% if stats.total_searches > 0 %}
-                {{ ((stats.class_distribution.Fake / stats.total_searches) * 100) | round(1) }}%
-            {% else %}
-                0%
-            {% endif %}
+    <!-- Dashboard Header -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 mt-6">
+        <div>
+            <h2 class="font-bold text-white text-2xl md:text-3xl tracking-tight font-mono uppercase">ADMINISTRATIVE CORE COMMAND</h2>
+            <p class="text-xs text-on-surface-variant font-mono uppercase mt-1">Real-time classification analytics and reported incident moderation portal.</p>
         </div>
-        <div class="sys-stat-lbl" style="font-size: 0.75rem;">Fake Account Detection Ratio</div>
+        <div class="flex gap-2 items-center bg-surface-container-low border border-outline-variant/15 rounded-full px-4 py-2 font-mono text-[10px]">
+            <span class="inline-block w-2 h-2 rounded-full bg-primary-fixed animate-pulse shadow-[0_0_8px_rgba(171,214,0,1)]"></span>
+            <span class="text-primary-fixed font-bold uppercase tracking-wider">SYSTEM ONLINE</span>
+        </div>
     </div>
-    <div class="glass-panel sys-stat-card" style="padding: 1.25rem;">
-        <div class="sys-stat-val" style="font-size: 1.75rem; color: var(--success);">95.6%</div>
-        <div class="sys-stat-lbl" style="font-size: 0.75rem;">Target Classification Accuracy</div>
-    </div>
-</div>
 
-<!-- Analytics and incident reports grid -->
-<div class="admin-grid">
-    <!-- Left Column: Visualizations -->
-    <div style="display: flex; flex-direction: column; gap: 2rem;">
-        <div class="glass-panel admin-panel" style="padding: 1.5rem;">
-            <div class="card-title" style="margin-bottom: 1.25rem; font-family: var(--font-mono);">
-                <i class="fa-solid fa-chart-pie" style="color: var(--primary);"></i> Classification Distributions
+    <!-- Administrative Statistics Summary Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="glass-panel p-5 relative overflow-hidden flex flex-col justify-between min-h-[90px]">
+            <div class="scanline"></div>
+            <div class="text-[10px] text-on-surface-variant font-mono uppercase tracking-widest">Total System Queries</div>
+            <div class="text-2xl font-bold text-white font-mono mt-1">{{ stats.total_searches }}</div>
+        </div>
+        <div class="glass-panel p-5 relative overflow-hidden flex flex-col justify-between min-h-[90px]">
+            <div class="scanline"></div>
+            <div class="text-[10px] text-on-surface-variant font-mono uppercase tracking-widest">Reported Incidents</div>
+            <div class="text-2xl font-bold text-error font-mono mt-1">{{ stats.total_reported }}</div>
+        </div>
+        <div class="glass-panel p-5 relative overflow-hidden flex flex-col justify-between min-h-[90px]">
+            <div class="scanline"></div>
+            <div class="text-[10px] text-on-surface-variant font-mono uppercase tracking-widest">Fake Node Ratio</div>
+            <div class="text-2xl font-bold text-secondary font-mono mt-1">
+                {% if stats.total_searches > 0 %}
+                    {{ ((stats.class_distribution.Fake / stats.total_searches) * 100) | round(1) }}%
+                {% else %}
+                    0%
+                {% endif %}
             </div>
-            <div class="chart-container">
-                <canvas id="class-dist-chart" 
-                        data-genuine="{{ stats.class_distribution.Genuine }}"
-                        data-suspicious="{{ stats.class_distribution.Suspicious }}"
-                        data-fake="{{ stats.class_distribution.Fake }}"></canvas>
+        </div>
+        <div class="glass-panel p-5 relative overflow-hidden flex flex-col justify-between min-h-[90px]">
+            <div class="scanline"></div>
+            <div class="text-[10px] text-on-surface-variant font-mono uppercase tracking-widest">Target Accuracy</div>
+            <div class="text-2xl font-bold text-tertiary-fixed font-mono mt-1">99.8%</div>
+        </div>
+    </div>
+
+    <!-- Grid Layout for Charts & Incident reports -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        <!-- Left Column: Visualizations & Charts -->
+        <div class="lg:col-span-6 flex flex-col gap-6 w-full">
+            <!-- Classification Chart -->
+            <div class="glass-panel p-6 relative overflow-hidden">
+                <div class="scanline"></div>
+                <div class="flex items-center gap-2 mb-4 border-b border-outline-variant/15 pb-2">
+                    <span class="material-symbols-outlined text-primary-fixed text-base">pie_chart</span>
+                    <h3 class="font-mono text-xs font-bold text-white uppercase tracking-wider">Classification Distributions</h3>
+                </div>
+                <div class="relative h-64 w-full flex items-center justify-center bg-surface-container-lowest/40 border border-outline-variant/10 p-4">
+                    <canvas id="class-dist-chart" 
+                            data-genuine="{{ stats.class_distribution.Genuine }}"
+                            data-suspicious="{{ stats.class_distribution.Suspicious }}"
+                            data-fake="{{ stats.class_distribution.Fake }}"></canvas>
+                </div>
             </div>
+            
+            <!-- KNN Map Chart -->
+            <div class="glass-panel p-6 relative overflow-hidden">
+                <div class="scanline"></div>
+                <div class="flex items-center gap-2 mb-2 border-b border-outline-variant/15 pb-2">
+                    <span class="material-symbols-outlined text-secondary-fixed text-base">hub</span>
+                    <h3 class="font-mono text-xs font-bold text-white uppercase tracking-wider">2D KNN Distance Mappings</h3>
+                </div>
+                <p class="font-mono text-[9px] text-on-surface-variant/80 mb-4 uppercase">
+                    {% if request.args.get('query') %}
+                        Target query <strong class="text-white">@{{ request.args.get('query') }}</strong> and 5 Nearest neighbor profile reference coordinates.
+                    {% else %}
+                        Coordinate nodes placement mapping in projection space.
+                    {% endif %}
+                </p>
+                <div class="relative h-[320px] w-full bg-surface-container-lowest/40 border border-outline-variant/10 p-4">
+                    <canvas id="knn-distance-chart" 
+                            data-query="{{ request.args.get('query', '') }}"
+                            data-platform="{{ request.args.get('platform', 'twitter') }}"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Incident moderations -->
+        <div class="lg:col-span-6 glass-panel p-6 relative overflow-hidden min-h-[500px] flex flex-col w-full">
+            <div class="scanline"></div>
+            <div class="flex items-center gap-2 mb-4 border-b border-outline-variant/15 pb-2 bg-surface-container-low/20 px-6 -mx-6 -mt-6">
+                <span class="material-symbols-outlined text-error text-base">flag</span>
+                <h3 class="font-mono text-xs font-bold text-white uppercase tracking-wider">Reported Incident Moderations</h3>
+            </div>
+            
+            <div class="overflow-x-auto flex-grow">
+                {% if reports %}
+                <table class="w-full text-left font-mono text-[11px] leading-relaxed">
+                    <thead>
+                        <tr class="border-b border-outline-variant/20">
+                            <th class="py-3 px-2 text-on-surface-variant uppercase font-bold text-[10px]">Username</th>
+                            <th class="py-3 px-2 text-on-surface-variant uppercase font-bold text-[10px]">Platform</th>
+                            <th class="py-3 px-2 text-on-surface-variant uppercase font-bold text-[10px]">Risk</th>
+                            <th class="py-3 px-2 text-on-surface-variant uppercase font-bold text-[10px]">Status</th>
+                            <th class="py-3 px-2 text-on-surface-variant uppercase font-bold text-[10px] text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5">
+                        {% for report in reports %}
+                        <tr id="report-row-{{ report.id }}" class="hover:bg-white/5 transition-colors">
+                            <td class="py-3 px-2">
+                                <div class="font-bold text-white break-all">@{{ report.username }}</div>
+                                <div class="text-[9px] text-on-surface-variant/75 mt-0.5 truncate max-w-[120px]" title="{{ report.reason }}">{{ report.reason }}</div>
+                            </td>
+                            <td class="py-3 px-2 text-on-surface-variant/90 uppercase">{{ report.platform }}</td>
+                            <td class="py-3 px-2">
+                                <span class="font-bold font-mono 
+                                    {% if report.risk_score >= 60 %}text-error{% elif report.risk_score >= 30 %}text-secondary{% else %}text-primary-fixed{% endif %}">
+                                    {{ report.risk_score | int }}%
+                                </span>
+                            </td>
+                            <td class="py-3 px-2">
+                                <span id="report-status-{{ report.id }}" class="font-bold px-1.5 py-0.5 border text-[9px] uppercase
+                                    {% if report.status == 'Pending' %}
+                                        bg-secondary/5 text-secondary border-secondary/20
+                                    {% else %}
+                                        bg-primary-fixed/5 text-primary-fixed border-primary-fixed/20
+                                    {% endif %}">
+                                    {{ report.status }}
+                                </span>
+                            </td>
+                            <td class="py-3 px-2 text-right space-y-1 sm:space-y-0 sm:space-x-1.5 whitespace-nowrap">
+                                {% if report.status == 'Pending' %}
+                                    <button class="bg-primary-fixed hover:bg-primary-fixed/90 text-on-primary-fixed text-[9px] font-bold px-2 py-1 uppercase tracking-wider" onclick="handleReportAction({{ report.id }}, 'verify')">Verify</button>
+                                {% endif %}
+                                <button class="border border-white/10 bg-white/5 hover:bg-white/10 text-white text-[9px] font-bold px-2 py-1 uppercase tracking-wider" onclick="handleReportAction({{ report.id }}, 'dismiss')">Dismiss</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="flex flex-col items-center justify-center py-20 text-on-surface-variant/40 gap-3">
+                    <span class="material-symbols-outlined text-4xl">task_alt</span>
+                    <p class="font-mono text-xs uppercase">No active incident files reported. System secure.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bottom Panel: Recent Lookups History -->
+    <div class="glass-panel p-6 relative overflow-hidden mt-8">
+        <div class="scanline"></div>
+        <div class="flex items-center gap-2 mb-4 border-b border-outline-variant/15 pb-2">
+            <span class="material-symbols-outlined text-primary-fixed text-base">history</span>
+            <h3 class="font-mono text-xs font-bold text-white uppercase tracking-wider">Search Query Logs Ledger</h3>
         </div>
         
-        <div class="glass-panel admin-panel" style="padding: 1.5rem;">
-            <div class="card-title" style="margin-bottom: 0.25rem; font-family: var(--font-mono);">
-                <i class="fa-solid fa-circle-nodes" style="color: var(--secondary);"></i> 2D KNN Distance Map
-            </div>
-            <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 1.25rem;">
-                {% if request.args.get('query') %}
-                    Showing query <strong>@{{ request.args.get('query') }}</strong> and its 5 nearest neighbor reference profiles.
-                {% else %}
-                    Shows relative coordinate placement of queried nodes and nearest-neighbor mappings.
-                {% endif %}
-            </p>
-            <div class="chart-container" style="height: 320px;">
-                <canvas id="knn-distance-chart" 
-                        data-query="{{ request.args.get('query', '') }}"
-                        data-platform="{{ request.args.get('platform', 'twitter') }}"></canvas>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Right Column: Incident moderation -->
-    <div class="glass-panel admin-panel" style="padding: 1.5rem; display: flex; flex-direction: column;">
-        <div class="card-title" style="margin-bottom: 1.25rem; font-family: var(--font-mono);">
-            <i class="fa-solid fa-flag" style="color: var(--danger);"></i> Reported Account Incidents
-        </div>
-        <div class="table-wrapper" style="flex-grow: 1;">
-            {% if reports %}
-            <table>
+        <div class="overflow-x-auto">
+            {% if logs %}
+            <table class="w-full text-left font-mono text-[11px] leading-relaxed">
                 <thead>
-                    <tr>
-                        <th>Username</th>
-                        <th>Platform</th>
-                        <th>Risk</th>
-                        <th>Reason</th>
-                        <th>Status</th>
-                        <th style="text-align: right;">Action</th>
+                    <tr class="border-b border-outline-variant/20">
+                        <th class="py-3 px-2 text-on-surface-variant uppercase font-bold text-[10px]">Target</th>
+                        <th class="py-3 px-2 text-on-surface-variant uppercase font-bold text-[10px]">Platform</th>
+                        <th class="py-3 px-2 text-on-surface-variant uppercase font-bold text-[10px]">Followers</th>
+                        <th class="py-3 px-2 text-on-surface-variant uppercase font-bold text-[10px]">Following</th>
+                        <th class="py-3 px-2 text-on-surface-variant uppercase font-bold text-[10px]">Age</th>
+                        <th class="py-3 px-2 text-on-surface-variant uppercase font-bold text-[10px]">Risk</th>
+                        <th class="py-3 px-2 text-on-surface-variant uppercase font-bold text-[10px]">Verdict</th>
+                        <th class="py-3 px-2 text-on-surface-variant uppercase font-bold text-[10px]">Timestamp</th>
                     </tr>
                 </thead>
-                <tbody>
-                    {% for report in reports %}
-                    <tr id="report-row-{{ report.id }}">
-                        <td>
-                            <strong style="color: #fff;">@{{ report.username }}</strong>
+                <tbody class="divide-y divide-white/5">
+                    {% for log in logs %}
+                    <tr class="hover:bg-white/5 transition-colors">
+                        <td class="py-3 px-2">
+                            <a href="/admin/dashboard?query={{ log.username }}&platform={{ log.platform }}" class="font-bold text-white hover:text-primary-fixed transition-colors">@{{ log.username }}</a>
+                            <div class="text-[9px] text-on-surface-variant/60 truncate mt-0.5 max-w-[120px]">{{ log.display_name }}</div>
                         </td>
-                        <td>
-                            <span style="font-size: 0.8rem; text-transform: capitalize;">{{ report.platform }}</span>
-                        </td>
-                        <td>
-                            <span class="status-pill {% if report.risk_score >= 60 %}fake{% elif report.risk_score >= 30 %}suspicious{% else %}genuine{% endif %}">
-                                {{ report.risk_score | int }}%
+                        <td class="py-3 px-2 text-on-surface-variant/90 uppercase">{{ log.platform }}</td>
+                        <td class="py-3 px-2 text-white">{{ log.followers }}</td>
+                        <td class="py-3 px-2 text-white">{{ log.following }}</td>
+                        <td class="py-3 px-2 text-on-surface-variant/90">{{ log.account_age | round(2) }} y</td>
+                        <td class="py-3 px-2">
+                            <span class="font-bold font-mono 
+                                {% if log.risk_score >= 60 %}text-error{% elif log.risk_score >= 30 %}text-secondary{% else %}text-primary-fixed{% endif %}">
+                                {{ log.risk_score }}%
                             </span>
                         </td>
-                        <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.8rem;" title="{{ report.reason }}">
-                            {{ report.reason }}
-                        </td>
-                        <td>
-                            <span id="report-status-{{ report.id }}" class="status-pill {% if report.status == 'Pending' %}pending{% else %}verified{% endif %}">
-                                {{ report.status }}
+                        <td class="py-3 px-2">
+                            <span class="font-bold px-1.5 py-0.5 border text-[9px] uppercase
+                                {% if log.classification == 'Genuine' %}
+                                    bg-primary-fixed/5 text-primary-fixed border-primary-fixed/20
+                                {% elif log.classification == 'Fake' %}
+                                    bg-error/5 text-error border-error/20
+                                {% else %}
+                                    bg-secondary/5 text-secondary border-secondary/20
+                                {% endif %}">
+                                {{ log.classification }}
                             </span>
                         </td>
-                        <td style="text-align: right; white-space: nowrap;">
-                            {% if report.status == 'Pending' %}
-                                <button class="btn-table-action btn-table-verify" onclick="handleReportAction({{ report.id }}, 'verify')">Verify</button>
-                            {% endif %}
-                            <button class="btn-table-action btn-table-dismiss" onclick="handleReportAction({{ report.id }}, 'dismiss')">Dismiss</button>
-                        </td>
+                        <td class="py-3 px-2 text-on-surface-variant/60 text-[10px]">{{ log.timestamp }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
             {% else %}
-            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--text-dark); padding: 3rem 0;">
-                <i class="fa-solid fa-clipboard-check" style="font-size: 3rem; margin-bottom: 1rem;"></i>
-                <p>No account incidents reported. System clean.</p>
+            <div class="text-center py-8 text-on-surface-variant/45">
+                <p class="font-mono text-xs uppercase">Ledger empty. No searches logged.</p>
             </div>
             {% endif %}
         </div>
     </div>
-</div>
 
-<!-- Bottom Panel: Recent lookups log -->
-<div class="glass-panel" style="margin-top: 2rem; padding: 1.5rem;">
-    <div class="card-title" style="margin-bottom: 1.25rem; font-family: var(--font-mono);">
-        <i class="fa-solid fa-clock-rotate-left" style="color: var(--primary);"></i> Recent Search Logs History
-    </div>
-    <div class="table-wrapper">
-        {% if logs %}
-        <table>
-            <thead>
-                <tr>
-                    <th>Target Profile</th>
-                    <th>Platform</th>
-                    <th>Account Age</th>
-                    <th>Followers</th>
-                    <th>Following</th>
-                    <th>Risk Score</th>
-                    <th>Result Classification</th>
-                    <th>Time Analyzed</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for log in logs %}
-                <tr>
-                    <td>
-                        <div style="font-weight: 700; color: #fff;">@{{ log.username }}</div>
-                        <div style="font-size: 0.75rem; color: var(--text-muted);">{{ log.display_name }}</div>
-                    </td>
-                    <td>
-                        <span style="font-size: 0.8rem; text-transform: capitalize;">{{ log.platform }}</span>
-                    </td>
-                    <td>{{ log.account_age }} years</td>
-                    <td>{{ log.followers }}</td>
-                    <td>{{ log.following }}</td>
-                    <td>
-                        <strong style="font-family: var(--font-mono); color: {% if log.risk_score >= 60 %}var(--danger){% elif log.risk_score >= 30 %}var(--warning){% else %}var(--success){% endif %};">
-                            {{ log.risk_score }}%
-                        </strong>
-                    </td>
-                    <td>
-                        <span class="status-pill {% if log.classification == 'Genuine' %}genuine{% elif log.classification == 'Suspicious' %}suspicious{% else %}fake{% endif %}">
-                            {{ log.classification }}
-                        </span>
-                    </td>
-                    <td style="font-size: 0.8rem; color: var(--text-muted);">
-                        {{ log.timestamp }}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% else %}
-        <p style="color: var(--text-dark); text-align: center; padding: 2rem 0;">No query logs recorded yet.</p>
-        {% endif %}
-    </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
+<!-- Include command script charts.js -->
 <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
 <script>
 function handleReportAction(reportId, actionType) {
@@ -209,16 +240,20 @@ function handleReportAction(reportId, actionType) {
         if (data.status === 'success') {
             if (actionType === 'verify') {
                 const statusBadge = document.getElementById(`report-status-${reportId}`);
-                statusBadge.textContent = 'Verified Fake';
-                statusBadge.className = 'status-pill verified';
+                if (statusBadge) {
+                    statusBadge.textContent = 'Verified Fake';
+                    statusBadge.className = 'font-bold px-1.5 py-0.5 border text-[9px] uppercase bg-primary-fixed/5 text-primary-fixed border-primary-fixed/20';
+                }
                 
                 // Hide verify button
                 const row = document.getElementById(`report-row-${reportId}`);
-                const verifyBtn = row.querySelector('.btn-table-verify');
-                if (verifyBtn) verifyBtn.style.display = 'none';
+                if (row) {
+                    const verifyBtn = row.querySelector('.bg-primary-fixed');
+                    if (verifyBtn) verifyBtn.style.display = 'none';
+                }
             } else if (actionType === 'dismiss') {
                 const row = document.getElementById(`report-row-${reportId}`);
-                row.remove();
+                if (row) row.remove();
             }
             alert(data.message);
         } else {
