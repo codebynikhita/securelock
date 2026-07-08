@@ -9,13 +9,13 @@ __pycache__/
 dist/
 build/
 
-# Model files (too large for GitHub — store separately or use Git LFS)
+# Model files - trained at runtime by build script, not committed
 *.pkl
 *.joblib
 *.h5
+data/models/
 
-# Data
-data/*.csv
+# Data (the large training CSV is included via !data/accounts.csv below)
 data/*.json
 
 # Environment
@@ -41,6 +41,5 @@ Thumbs.db
 # Node (if any)
 node_modules/
 
-# Force include dataset and model files for deployment
+# Force include accounts.csv for training on render
 !data/accounts.csv
-!data/models/*.joblib
