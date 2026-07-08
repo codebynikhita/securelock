@@ -94,6 +94,21 @@ class SecureLockModel:
                         'posts_count': 0.032,
                         'following_count': 0.022
                     }
+                # --- FIX LINUX UNPICKLING BUG ---
+                # The underlying C++ Booster object is dropped on Linux during joblib.load.
+                # We manually load it from the native JSON format and inject it back.
+                try:
+                    from xgboost import Booster
+                    xgb_fake_booster = Booster()
+                    xgb_fake_booster.load_model(os.path.join(MODEL_DIR, 'xgb_fake_booster.json'))
+                    self.ensemble_fake.estimators_[1]._Booster = xgb_fake_booster
+                    
+                    xgb_clone_booster = Booster()
+                    xgb_clone_booster.load_model(os.path.join(MODEL_DIR, 'xgb_clone_booster.json'))
+                    self.ensemble_clone.estimators_[1]._Booster = xgb_clone_booster
+                except Exception as e:
+                    print(f"Failed to load native boosters: {e}")
+
                 self.loaded = True
                 print("Models loaded successfully in SecureLockModel.")
             else:

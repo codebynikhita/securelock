@@ -130,6 +130,10 @@ def train_realistic_models():
     ensemble_clone = VotingClassifier(estimators=[('rf', rf_clone), ('xgb', xgb_clone)], voting='soft')
     ensemble_clone.fit(X_train_scaled, y_train_clone)
     
+    # NATIVELY SAVE XGBOOST BOOSTERS TO BYPASS LINUX JOBLIB BUG
+    ensemble_fake.estimators_[1].get_booster().save_model(os.path.join(MODEL_DIR, 'xgb_fake_booster.json'))
+    ensemble_clone.estimators_[1].get_booster().save_model(os.path.join(MODEL_DIR, 'xgb_clone_booster.json'))
+    
     # Train KNN models for anomaly boundaries
     knn_fake = KNeighborsClassifier(n_neighbors=7)
     knn_fake.fit(X_train_scaled, y_train_fake)
