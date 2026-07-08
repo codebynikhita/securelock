@@ -3,8 +3,17 @@ import numpy as np
 import pandas as pd
 import joblib
 import re
-from model_def import XGBClassifier
+from xgboost import XGBClassifier
 
+# --- MONKEY PATCH FOR XGBOOST ON LINUX (Render) ---
+# joblib unpickling drops the 'objective' attribute on some architectures.
+old_predict_proba = XGBClassifier.predict_proba
+def patched_predict_proba(self, X, *args, **kwargs):
+    if not hasattr(self, 'objective'):
+        self.objective = 'binary:logistic'
+    return old_predict_proba(self, X, *args, **kwargs)
+XGBClassifier.predict_proba = patched_predict_proba
+# --------------------------------------------------
 
 # Paths
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -72,12 +81,13 @@ class SecureLockModel:
                 self.knn_fake = joblib.load(knn_fake_path)
                 self.knn_clone = joblib.load(knn_clone_path)
 
-                # Fix XGBoost cross-platform unpickling bug by restoring missing 'objective'
+                # Bulletproof instance-level XGBoost patch for Render Linux
                 for ensemble in [self.ensemble_fake, self.ensemble_clone]:
                     if hasattr(ensemble, 'estimators_'):
                         for clf in ensemble.estimators_:
-                            if type(clf).__name__ == 'XGBClassifier' and not hasattr(clf, 'objective'):
+                            if hasattr(clf, 'get_booster'):  # Definitively identifies XGBoost
                                 clf.objective = 'binary:logistic'
+                                clf._objective = 'binary:logistic'
                 
                 if os.path.exists(importance_path):
                     self.feature_importances = joblib.load(importance_path)
