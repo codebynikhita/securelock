@@ -330,88 +330,79 @@ class SecureLockModel:
         explanations = self.get_feature_contributions(raw_features, scaled, explainer_model, active_prob)
         
         # Clone matching check against existing DB users
+        # Only run if clone probability is meaningful — skip for obvious non-clones (saves OOM on Render free tier)
         clone_target = None
-        if all_db_profiles and raw_features.get('username'):
+        if all_db_profiles and raw_features.get('username') and clone_prob > 0.2:
             curr_user = raw_features['username'].lower()
             best_match = None
             min_dist = 999
             best_cos_sim = 0.0
             best_euc_dist = 999.0
             
-            # Query feature vector scaled
+            # Query feature vector
             query_vec = scaled[0]
-            
-            for profile in all_db_profiles:
-                p_username = profile['username'].lower()
-                if p_username == curr_user:
+
+            # --- VECTORIZED CLONE SCAN (no per-row DataFrame creation) ---
+            # Extract all feature values into lists first, then batch-scale once
+            usernames_list = []
+            raw_vecs = []
+            profiles_index = []
+
+            for i, profile in enumerate(all_db_profiles):
+                p_user = str(profile.get('username', '')).lower()
+                if p_user == curr_user:
                     continue
-                
-                # Compute Levenshtein distance
-                dist = levenshtein_distance(curr_user, p_username)
-                
-                # Extract behavioral features for vector calculations (matching our 8-feature representation)
+
                 try:
                     p_followers = float(profile.get('network_count', 0))
                     p_following = float(profile.get('following_count', 0))
-                    p_posts = float(profile.get('posts_count', 0))
+                    p_posts    = float(profile.get('posts_count', 0))
                     p_age_days = float(profile.get('account_age', 0.01))
-                    
-                    if p_age_days > 100:
-                        p_age_years = p_age_days / 365.0
-                    else:
-                        p_age_years = p_age_days
-                        
-                    p_ratio = p_followers / (p_following + 1)
-                    
-                    # Username patterns
-                    p_user = str(profile.get('username', ''))
-                    p_digit_ratio = sum(c.isdigit() for c in p_user) / len(p_user) if len(p_user) > 0 else 0
+                    p_age_years = p_age_days / 365.0 if p_age_days > 100 else p_age_days
+                    p_ratio    = p_followers / (p_following + 1)
+                    p_digit_ratio  = sum(c.isdigit() for c in p_user) / len(p_user) if p_user else 0
                     p_trailing = 1 if re.search(r'\d{4,}$', p_user) else 0
-                    
-                    # Completeness
-                    p_bio = profile.get('bio', '')
-                    p_bio_present = 1 if p_bio and str(p_bio).strip() != "" and str(p_bio) != "nan" and str(p_bio) != "None" else 0
-                    p_pic = int(profile.get('profile_picture', 1))
-                    p_completeness = p_pic + p_bio_present + (p_posts > 0)
-                    
-                    # New and aggressive
-                    p_aggressive = 1 if (p_age_days < 30 and (p_posts > 300 or p_following > 1000)) else 0
-                    
-                    # Post frequency
-                    p_freq = p_posts / (p_age_days + 1)
-                    
-                    db_features = pd.DataFrame([{
-                        'network_following_ratio': p_ratio,
-                        'username_digit_ratio': p_digit_ratio,
-                        'username_has_trailing_digits': p_trailing,
-                        'profile_completeness': p_completeness,
-                        'is_new_and_aggressive': p_aggressive,
-                        'account_age': p_age_years,
-                        'profile_picture': p_pic,
-                        'post_frequency': p_freq
-                    }])
-                    db_scaled = self.scaler.transform(db_features)[0]
-                    
-                    cos_sim = cosine_similarity(query_vec, db_scaled)
-                    euc_dist = euclidean_distance(query_vec, db_scaled)
-                except Exception as e:
-                    cos_sim = 0.0
-                    euc_dist = 999.0
-                
-                # Check for clone signature: close username OR extremely high feature similarity (behavior mimicry)
-                # To prevent false positives, behavioral similarity only triggers clone detection if there is also some username overlap.
-                if dist <= 2 or (cos_sim >= 0.95 and (dist <= 5 and (curr_user in p_username or p_username in curr_user))):
-                    if dist < min_dist:
-                        min_dist = dist
-                        best_match = profile
-                        best_cos_sim = cos_sim
-                        best_euc_dist = euc_dist
-            
+                    p_bio      = profile.get('bio', '')
+                    p_bio_ok   = 1 if p_bio and str(p_bio).strip() not in ('', 'nan', 'None') else 0
+                    p_pic      = int(profile.get('profile_picture', 1))
+                    p_complete = p_pic + p_bio_ok + (p_posts > 0)
+                    p_aggr     = 1 if (p_age_days < 30 and (p_posts > 300 or p_following > 1000)) else 0
+                    p_freq     = p_posts / (p_age_days + 1)
+                    # content_similarity not stored in DB profiles — default 0.1
+                    raw_vecs.append([p_ratio, p_digit_ratio, p_trailing, p_complete,
+                                     p_aggr, p_age_years, p_pic, p_freq, 0.1])
+                    usernames_list.append(p_user)
+                    profiles_index.append(i)
+                except Exception:
+                    continue
+
+            if raw_vecs:
+                # Single batch scale — vastly cheaper than 8303 individual transforms
+                batch = np.array(raw_vecs, dtype=np.float64)
+                batch_scaled = self.scaler.transform(batch)   # shape (N, 9)
+
+                # Compute cosine similarities in one vectorized step
+                query_norm = query_vec / (np.linalg.norm(query_vec) + 1e-10)
+                norms = np.linalg.norm(batch_scaled, axis=1, keepdims=True) + 1e-10
+                batch_normed = batch_scaled / norms
+                cos_sims = batch_normed @ query_norm            # (N,)
+                euc_dists = np.linalg.norm(batch_scaled - query_vec, axis=1)  # (N,)
+
+                for idx, (p_user, cos_sim, euc_dist) in enumerate(zip(usernames_list, cos_sims, euc_dists)):
+                    lev_dist = levenshtein_distance(curr_user, p_user)
+                    if lev_dist <= 2 or (cos_sim >= 0.95 and lev_dist <= 5 and
+                                         (curr_user in p_user or p_user in curr_user)):
+                        if lev_dist < min_dist:
+                            min_dist = lev_dist
+                            best_match = all_db_profiles[profiles_index[idx]]
+                            best_cos_sim = float(cos_sim)
+                            best_euc_dist = float(euc_dist)
+
             # If we have a close match and similarity signals
             if best_match and (clone_prob > 0.4 or raw_features.get('content_similarity', 0) > 0.5 or best_cos_sim >= 0.90):
                 clone_target = {
                     'username': best_match['username'],
-                    'display_name': best_match['display_name'],
+                    'display_name': best_match.get('display_name', best_match['username']),
                     'distance': min_dist,
                     'is_verified': best_match.get('is_verified', False),
                     'cosine_similarity': round(best_cos_sim, 4),
@@ -421,6 +412,7 @@ class SecureLockModel:
                 clone_prob = max(clone_prob, 0.88)
                 combined_risk = max(combined_risk, 88.0)
                 classification = "Fake"
+
                 
         # Compute individual algorithm risk for KNN
         knn_risk = max(knn_fake_prob, knn_clone_prob) * 100
