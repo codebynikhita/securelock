@@ -8,7 +8,6 @@ import urllib.parse
 import urllib.error
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash
 from model import SecureLockModel
-from model_def import XGBClassifier
 import database
 import socket
 socket.setdefaulttimeout(5.0)

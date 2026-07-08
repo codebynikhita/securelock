@@ -9,13 +9,13 @@ __pycache__/
 dist/
 build/
 
-# Model files - trained at runtime by build script, not committed
+# Model files - trained at runtime by build script on Render, not committed to git
 *.pkl
 *.joblib
 *.h5
 data/models/
 
-# Data (the large training CSV is included via !data/accounts.csv below)
+# Data
 data/*.json
 
 # Environment
@@ -41,5 +41,5 @@ Thumbs.db
 # Node (if any)
 node_modules/
 
-# Force include accounts.csv for training on render
+# Force include accounts.csv for training on Render
 !data/accounts.csv

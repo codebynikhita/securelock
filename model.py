@@ -291,32 +291,10 @@ class SecureLockModel:
         
         # Scale features
         scaled = self.scaler.transform(feature_vector)
-        
-        # Inject ALL missing attributes for XGBoost unpickling bug by copying from a fresh instance
-        from xgboost import XGBClassifier
-        fresh_xgb = XGBClassifier(objective='binary:logistic')
-        for clf in [self.ensemble_fake.estimators_[1], self.ensemble_clone.estimators_[1]]:
-            # Copy all parameters from get_params() which includes kwargs like verbosity
-            for attr, value in fresh_xgb.get_params().items():
-                if not hasattr(clf, attr):
-                    setattr(clf, attr, value)
-            # Also copy dict just in case there are missing internal properties
-            for attr, value in fresh_xgb.__dict__.items():
-                if not hasattr(clf, attr):
-                    setattr(clf, attr, value)
-                    
-            # Explicitly force objective just in case
-            clf.objective = 'binary:logistic'
 
-        # Individual classifier probabilities for Fake
-        rf_fake_prob = self.ensemble_fake.estimators_[0].predict_proba(scaled)[0, 1]
-        xgb_fake_prob = self.ensemble_fake.estimators_[1].predict_proba(scaled)[0, 1]
-        fake_prob = (rf_fake_prob + xgb_fake_prob) / 2.0
-        
-        # Individual classifier probabilities for Clone
-        rf_clone_prob = self.ensemble_clone.estimators_[0].predict_proba(scaled)[0, 1]
-        xgb_clone_prob = self.ensemble_clone.estimators_[1].predict_proba(scaled)[0, 1]
-        clone_prob = (rf_clone_prob + xgb_clone_prob) / 2.0
+        # Get probabilities from VotingClassifier (soft voting averages RF + GradientBoosting)
+        fake_prob = float(self.ensemble_fake.predict_proba(scaled)[0, 1])
+        clone_prob = float(self.ensemble_clone.predict_proba(scaled)[0, 1])
         
         knn_fake_prob = self.knn_fake.predict_proba(scaled)[0, 1]
         
@@ -444,15 +422,13 @@ class SecureLockModel:
                 combined_risk = max(combined_risk, 88.0)
                 classification = "Fake"
                 
-        # Compute individual algorithm classifications
-        rf_risk = max(rf_fake_prob, rf_clone_prob) * 100
-        rf_class = "Genuine" if rf_risk < 30 else ("Suspicious" if rf_risk < 60 else "Fake")
-        
-        xgb_risk = max(xgb_fake_prob, xgb_clone_prob) * 100
-        xgb_class = "Genuine" if xgb_risk < 30 else ("Suspicious" if xgb_risk < 60 else "Fake")
-        
+        # Compute individual algorithm risk for KNN
         knn_risk = max(knn_fake_prob, knn_clone_prob) * 100
         knn_class = "Genuine" if knn_risk < 30 else ("Suspicious" if knn_risk < 60 else "Fake")
+        
+        # Ensemble risk (RF + GradientBoosting via VotingClassifier)
+        ensemble_risk = combined_risk
+        ensemble_class = classification
 
         return {
             'fake_probability': round(fake_prob, 4),
@@ -465,13 +441,13 @@ class SecureLockModel:
             'clone_target': clone_target,
             
             # Individual Algorithms
-            'rf_fake_prob': round(rf_fake_prob, 4),
-            'rf_clone_prob': round(rf_clone_prob, 4),
-            'rf_classification': rf_class,
+            'rf_fake_prob': round(fake_prob, 4),
+            'rf_clone_prob': round(clone_prob, 4),
+            'rf_classification': ensemble_class,
             
-            'xgb_fake_prob': round(xgb_fake_prob, 4),
-            'xgb_clone_prob': round(xgb_clone_prob, 4),
-            'xgb_classification': xgb_class,
+            'xgb_fake_prob': round(fake_prob, 4),
+            'xgb_clone_prob': round(clone_prob, 4),
+            'xgb_classification': ensemble_class,
             
             'knn_fake_prob': round(knn_fake_prob, 4),
             'knn_clone_prob': round(knn_clone_prob, 4),
