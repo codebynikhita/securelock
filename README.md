@@ -19,21 +19,20 @@
 
 ## The Story Behind This Project
 
-This started as a **university major project** — 4 of us in a group, lots of plans, weekly meetings, shared Notion docs. 
+Honestly? This started as a university major project that kind of just... happened to me.
 
-It ended as a **demo that barely worked**.
+You know how group projects go — everyone's got ideas, there's a shared doc somewhere, a few meetings, some half-built code. By the end we had something that technically ran. 
 
-After the submission deadline, I couldn't let it go. I genuinely believed the idea was solid — detecting fake and cloned social media accounts using machine learning is a real problem that real platforms still struggle with. So I kept going. **Alone.**
+But I kept thinking about it after submission. The *idea* was genuinely good — fake account detection is a real problem and the prototype we had felt like it was sitting at like 30% of what it could be. So I just kept working on it in my own time.
 
-What you're looking at now is what I built *after* university, on my own time, from scratch on top of the prototype:
+One thing led to another and I ended up:
+- Swapping the static data with a **live scraper** that pulls real Instagram stats in real-time
+- Retraining the models on **50,000 accounts** instead of the original 5,000
+- Rebuilding the UI from scratch so it actually looks like something worth showing
+- Adding an **admin dashboard** with real charts and detection logs
+- Actually deploying it — not just `localhost:5000`
 
-- Replaced the hardcoded dummy data with a **live Googlebot scraper** that fetches real followers/following/posts from Instagram in real-time
-- Retrained the models on **50,000 synthetic accounts** (the original had 5,000)
-- Built a proper **glassmorphism UI** that actually looks like a product, not a university assignment
-- Added a full **admin dashboard** with charts, flagged account logs, and platform analytics  
-- Deployed it to **Render** so anyone can use it — not just the professor at viva
-
-I'm proud of this. Not because it's perfect, but because I finished it when nobody else would.
+It sort of became my thing. Not complaining about it at all — just how it went.
 
 ---
 
