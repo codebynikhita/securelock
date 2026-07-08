@@ -6,13 +6,12 @@ import re
 from xgboost import XGBClassifier
 
 # --- MONKEY PATCH FOR XGBOOST ON LINUX (Render) ---
-# joblib unpickling drops the 'objective' attribute on some architectures.
-old_predict_proba = XGBClassifier.predict_proba
-def patched_predict_proba(self, X, *args, **kwargs):
-    if not hasattr(self, 'objective'):
-        self.objective = 'binary:logistic'
-    return old_predict_proba(self, X, *args, **kwargs)
-XGBClassifier.predict_proba = patched_predict_proba
+# joblib unpickling drops MANY attributes on some architectures.
+def patched_getattr(self, name):
+    if name == 'objective':
+        return 'binary:logistic'
+    return None
+XGBClassifier.__getattr__ = patched_getattr
 # --------------------------------------------------
 
 # Paths
