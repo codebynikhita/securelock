@@ -5,14 +5,7 @@ import joblib
 import re
 from xgboost import XGBClassifier
 
-# --- MONKEY PATCH FOR XGBOOST ON LINUX (Render) ---
-# joblib unpickling drops MANY attributes on some architectures.
-def patched_getattr(self, name):
-    if name == 'objective':
-        return 'binary:logistic'
-    return None
-XGBClassifier.__getattr__ = patched_getattr
-# --------------------------------------------------
+# Removed dangerous __getattr__ hook that broke hasattr()
 
 # Paths
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -309,9 +302,15 @@ class SecureLockModel:
         from xgboost import XGBClassifier
         fresh_xgb = XGBClassifier(objective='binary:logistic')
         for clf in [self.ensemble_fake.estimators_[1], self.ensemble_clone.estimators_[1]]:
+            # Copy all parameters from get_params() which includes kwargs like verbosity
+            for attr, value in fresh_xgb.get_params().items():
+                if not hasattr(clf, attr):
+                    setattr(clf, attr, value)
+            # Also copy dict just in case there are missing internal properties
             for attr, value in fresh_xgb.__dict__.items():
                 if not hasattr(clf, attr):
                     setattr(clf, attr, value)
+                    
             # Explicitly force objective just in case
             clf.objective = 'binary:logistic'
 
