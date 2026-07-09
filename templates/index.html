@@ -29,9 +29,24 @@
         <h2 class="font-mono text-xl md:text-2xl text-white font-bold tracking-tight mb-4 uppercase">SYSTEM CORRUPTION :: NODE NOT FOUND</h2>
         <p class="font-mono text-sm text-on-surface-variant leading-relaxed mb-8">{{ error }}</p>
         
-        <a href="/" class="inline-flex items-center gap-2 bg-white/5 border border-white/10 hover:bg-white/10 text-white font-mono text-xs px-6 py-3 transition-colors">
-            <span class="material-symbols-outlined text-sm">arrow_back</span> REBOOT INQUIRY
-        </a>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <a href="/" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white/5 border border-white/10 hover:bg-white/10 text-white font-mono text-xs px-6 py-3 transition-colors">
+                <span class="material-symbols-outlined text-sm">arrow_back</span> REBOOT INQUIRY
+            </a>
+            <form action="/detect" method="POST" class="w-full sm:w-auto">
+                <input type="hidden" name="username" value="{{ request.form.get('username', '') }}">
+                <input type="hidden" name="platform" value="{{ request.form.get('platform', 'instagram') }}">
+                <input type="hidden" name="manual_mode" value="true">
+                <input type="hidden" name="followers" value="0">
+                <input type="hidden" name="following" value="0">
+                <input type="hidden" name="posts" value="0">
+                <input type="hidden" name="account_age" value="3.5">
+                <input type="hidden" name="profile_picture" value="1">
+                <button type="submit" class="w-full inline-flex items-center justify-center gap-2 bg-primary-fixed text-on-primary-fixed hover:bg-primary-fixed/90 font-mono text-xs px-6 py-3 transition-colors font-bold uppercase tracking-wider">
+                    <span class="material-symbols-outlined text-sm">edit</span> ANALYZE MANUALLY
+                </button>
+            </form>
+        </div>
     </div>
 </div>
 
