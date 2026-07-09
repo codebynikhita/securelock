@@ -391,7 +391,18 @@ add_img(doc,
     caption='Figure 8: KNN anomaly graph — query point vs 7 nearest neighbours in feature space'
 )
 
-heading(doc, '7.5 UI Design System', level=2)
+heading(doc, '7.5 Profile Picture Extraction', level=2)
+para(doc,
+    'The live scraper extracts the raw profile picture URL directly from Instagram’s public CDN. '
+    'Below is the retrieved profile image of the tested user account (@__nikhita__09) during a live scan:'
+)
+add_img(doc,
+    os.path.join(REPORT_DIR, 'nikhita_profile_pic.jpg'),
+    width=Inches(1.5),
+    caption='Figure 9: Real-time profile picture extracted from Instagram CDN'
+)
+
+heading(doc, '7.6 UI Design System', level=2)
 simple_table(doc,
     ['Element', 'Implementation'],
     [
