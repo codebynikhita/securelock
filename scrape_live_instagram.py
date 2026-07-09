@@ -17,9 +17,11 @@ def _fetch_json_api(username):
     cj = http.cookiejar.CookieJar()
     opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cj))
 
-    # Step 1: Visit Instagram home page to acquire session cookies
-    home_url = 'https://www.instagram.com/'
-    home_headers = {
+    # Step 1: Visit Instagram profile page to acquire session cookies
+    # This works better on cloud servers because profile page requests
+    # set the mid/csrftoken cookies during redirects, even if redirecting to a login wall.
+    profile_url = f'https://www.instagram.com/{username}/'
+    profile_headers = {
         'User-Agent': (
             'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
             'AppleWebKit/537.36 (KHTML, like Gecko) '
@@ -29,11 +31,12 @@ def _fetch_json_api(username):
         'Accept-Language': 'en-US,en;q=0.9',
     }
     try:
-        req_home = urllib.request.Request(home_url, headers=home_headers)
-        with opener.open(req_home, timeout=6.0) as r:
+        req_profile = urllib.request.Request(profile_url, headers=profile_headers)
+        with opener.open(req_profile, timeout=6.0) as r:
             r.read()
     except Exception as e:
-        # If home page fails, we try to proceed anyway without cookies
+        # We expect a redirect to login wall (302/404) or block, but the response
+        # headers will still contain 'Set-Cookie' fields which cj parses!
         pass
 
     # Extract csrftoken if found
