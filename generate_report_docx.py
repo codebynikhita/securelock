@@ -402,7 +402,27 @@ add_img(doc,
     caption='Figure 9: Real-time profile picture extracted from Instagram CDN'
 )
 
-heading(doc, '7.6 UI Design System', level=2)
+heading(doc, '7.6 Account Age Heuristic (OSINT Mapping)', level=2)
+para(doc,
+    'Instagram does not expose the raw creation date of an account on public guest views. '
+    'To overcome this limitation, I developed an OSINT-based heuristic that maps the sequential numerical user ID (owner_id) '
+    'to its chronological creation date. Because Instagram assigns these IDs sequentially at registration, '
+    'we can estimate the account age in years with high accuracy by checking the ID against known registration milestones.'
+)
+simple_table(doc,
+    ['Numerical ID Range', 'Estimated Age (Years)', 'Milestone Era'],
+    [
+        ['> 100 Billion', '0.5 years', 'Very new account (Recent)'],
+        ['> 90 Billion',  '1.0 years', '2025 Creation'],
+        ['> 52 Billion',  '4.0 years', '2022 Creation'],
+        ['> 15 Billion',  '7.0 years', '2019 Creation'],
+        ['> 2 Billion',   '9.5 years', '2016 Creation'],
+        ['< 500 Million', '14.5 years', 'Early Adopter (2011)'],
+    ],
+    col_widths=[Inches(2.5), Inches(2.0), Inches(2.0)]
+)
+
+heading(doc, '7.7 UI Design System', level=2)
 simple_table(doc,
     ['Element', 'Implementation'],
     [
@@ -509,7 +529,7 @@ simple_table(doc,
     ['Limitation', 'Impact', 'Root Cause'],
     [
         ['Render sleeps after 15 min idle', 'First visit after idle: 30–60s delay', 'Free tier spins down inactive services'],
-        ['Instagram-only live scraping',    'Twitter/FB/LinkedIn use estimated features', 'Platforms block Googlebot scraping'],
+        ['Twitter-only estimation fallback', 'Twitter profiles use estimated features', 'Twitter completely blocks non-logged-in traffic with hard login walls, preventing guest crawling.'],
         ['Estimation mode for unknown accounts', 'Lower accuracy for out-of-dataset accounts', 'No live API access without credentials'],
         ['512MB RAM ceiling',               'Cannot use GradientBoosting / XGBoost', 'Render free tier memory limit'],
         ['No bio/image content analysis',   'Content similarity is estimated, not computed', 'Would require NLP/CV pipeline'],
