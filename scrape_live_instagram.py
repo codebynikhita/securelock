@@ -10,8 +10,40 @@ def _fetch_json_api(username):
     """
     Uses Instagram's internal web_profile_info API.
     Returns exact real-time follower/following/post counts — not cached.
-    No login required, just the right headers.
+    Uses CookieJar session emulation to obtain a valid csrftoken/mid first,
+    which bypasses the HTTP 429 Too Many Requests rate-limiting on cloud servers.
     """
+    import http.cookiejar
+    cj = http.cookiejar.CookieJar()
+    opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cj))
+
+    # Step 1: Visit Instagram home page to acquire session cookies
+    home_url = 'https://www.instagram.com/'
+    home_headers = {
+        'User-Agent': (
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+            'AppleWebKit/537.36 (KHTML, like Gecko) '
+            'Chrome/125.0.0.0 Safari/537.36'
+        ),
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+    }
+    try:
+        req_home = urllib.request.Request(home_url, headers=home_headers)
+        with opener.open(req_home, timeout=6.0) as r:
+            r.read()
+    except Exception as e:
+        # If home page fails, we try to proceed anyway without cookies
+        pass
+
+    # Extract csrftoken if found
+    csrf = ''
+    for cookie in cj:
+        if cookie.name == 'csrftoken':
+            csrf = cookie.value
+            break
+
+    # Step 2: Query the JSON API using the cookie-enabled opener
     hosts = ['www.instagram.com', 'i.instagram.com']
     last_err = None
     data = None
@@ -25,14 +57,15 @@ def _fetch_json_api(username):
                 'Chrome/125.0.0.0 Safari/537.36'
             ),
             'x-ig-app-id': '936619743392459',
+            'x-csrftoken': csrf,
+            'x-requested-with': 'XMLHttpRequest',
             'Accept': '*/*',
             'Accept-Language': 'en-US,en;q=0.9',
-            'Referer': 'https://www.instagram.com/',
-            'Origin': 'https://www.instagram.com',
+            'Referer': f'https://www.instagram.com/{username}/',
         }
         try:
             req = urllib.request.Request(url, headers=headers)
-            with urllib.request.urlopen(req, timeout=6.0) as r:
+            with opener.open(req, timeout=6.0) as r:
                 data = json.loads(r.read().decode('utf-8'))
                 break
         except Exception as e:
