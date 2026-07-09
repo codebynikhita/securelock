@@ -382,10 +382,8 @@ def detect():
         account_data = None
         source = "database"
 
-        # ── For Instagram: ALWAYS scrape live first ──────────────────────────
-        # The CSV contains synthetic training data. An account in the CSV may
-        # not actually exist on Instagram. Scraping confirms real existence.
-        if platform == 'instagram':
+        # ── Live-Scraped Platforms: Instagram, Facebook, LinkedIn ────────────
+        if platform in ('instagram', 'facebook', 'linkedin'):
             scraped_data, scrape_logs = fetch_live_profile_data(username, platform)
             status_logs.extend(scrape_logs)
 
@@ -421,15 +419,28 @@ def detect():
                         account_data['is_clone'] = row.get('is_clone', 0)
                         account_data['content_similarity'] = row.get('content_similarity', 0.1)
                         status_logs.append("Live data supplemented with labelled dataset signals.")
-            else:
-                # Account doesn't exist on Instagram — reject regardless of CSV
+            
+            # If live scraping failed, fall back to local database check before showing error
+            if not account_data:
+                if df_accounts is not None:
+                    match = df_accounts[
+                        (df_accounts['username'].str.lower() == username.lower()) &
+                        (df_accounts['platform'] == platform)
+                    ]
+                    if len(match) > 0:
+                        account_data = match.iloc[0].to_dict()
+                        status_logs.append("Direct scraping restricted. Query matched local database profile cache.")
+                        source = "database"
+
+            if not account_data:
+                platform_name = platform.capitalize()
                 return render_template('index.html',
-                    error=f"❌ @{username} could not be found on Instagram. The account may not exist, may be private, or may have been deleted.",
+                    error=f"❌ @{username} could not be found on {platform_name}. The account may not exist, may be private, or may have been deleted.",
                     db_stats=db_stats,
                     suggestions=suggestions
                 )
 
-        # ── For other platforms: use CSV cache ───────────────────────────────
+        # ── Non-Scraped Platforms: Twitter (X) and others ──────────────────
         else:
             if df_accounts is not None:
                 match = df_accounts[
