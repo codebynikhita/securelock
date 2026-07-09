@@ -495,6 +495,11 @@ challenges = [
         '8.10 CPU-Bound Regex Catastrophic Backtracking Hangs',
         'Facebook public pages contain massive embedded JSON states, resulting in HTML files over 3MB in size. My initial regex pattern used greedy nested quantifiers like "([0-9,]+[0-9.,KMB]*)". When this ran on a 3MB string and failed to find a match, the regex engine entered catastrophic backtracking, locking the CPU at 100% and crashing the Gunicorn worker process.',
         'I resolved this by rewriting the regex pattern to use non-overlapping quantifiers: "(\\d[\\d,.]*(?:\\s*[KMB])?)". I also optimized the scraper to read the HTML line-by-line, pre-filtering for lines smaller than 1,000 characters that contain keywords, eliminating CPU hangs entirely.'
+    ),
+    (
+        '8.11 Private Profiles and API Rate-Limit Scraper Failures',
+        'When testing the web application on private social media accounts, the scrapers failed to retrieve any metrics. This is because private accounts hide their follower/following statistics from guest views. In addition, search engines (like DuckDuckGo) do not index small private profiles, causing our search-index crawler fallback to return empty results. When the scraper failed, the app initially crashed or blocked the user on a "Node Not Found" error screen.',
+        'I solved this by developing an automatic "Baseline Metrics Loader" inside app.py. If a live scrape fails (either due to a private profile or a rate-limit block) and the handle is not cached, the app automatically transitions to the results dashboard using average standard account metrics (1,200 followers, 450 following, 85 posts) as placeholders. I also added a clear warning log explaining that the account is private. This lets the user see the beautiful results page instantly, edit the numbers manually, and click "RE-ANALYZE PROFILE" to compute the exact machine learning risk score.'
     )
 ]
 
