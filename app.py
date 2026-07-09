@@ -495,6 +495,19 @@ def detect():
 def api_version():
     return jsonify({"commit": "be2c04a", "status": "active"}), 200
 
+@app.route('/api/test_scrape', methods=['GET'])
+def api_test_scrape():
+    username = request.args.get('username', 'nasa')
+    platform = request.args.get('platform', 'facebook')
+    data, logs = fetch_live_profile_data(username, platform)
+    return jsonify({
+        "status": "success",
+        "platform": platform,
+        "username": username,
+        "scraped_data": data,
+        "logs": logs
+    })
+
 @app.route('/api/detect', methods=['POST', 'GET'])
 def api_detect():
     """
