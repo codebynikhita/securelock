@@ -209,89 +209,25 @@ def fetch_live_profile_data(username, platform):
     scraped_data = None
     try:
         if platform.lower() == 'instagram':
-            status_logs.append("Routing Instagram query via Googlebot indexing agent...")
-            googlebot_req = urllib.request.Request(
-                url, 
-                headers={'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'}
-            )
-            with urllib.request.urlopen(googlebot_req, timeout=4.0) as response:
-                html = response.read().decode('utf-8', errors='ignore')
-                
-                meta_pattern = r'content="([0-9.,\sKMB]+)\s+Followers,\s+([0-9.,\sKMB]+)\s+Following,\s+([0-9.,\sKMB]+)\s+Posts'
-                match = re.search(meta_pattern, html, re.IGNORECASE)
-                
-                followers = 0
-                following = 0
-                posts = 0
-                
-                def clean_num(s):
-                    s = s.replace(',', '').replace(' ', '').strip().upper()
-                    if not s: return 0
-                    if 'K' in s:
-                        return int(float(s.replace('K', '')) * 1000)
-                    if 'M' in s:
-                        return int(float(s.replace('M', '')) * 1000000)
-                    try:
-                        return int(float(s))
-                    except:
-                        return 0
-                        
-                if match:
-                    followers = clean_num(match.group(1))
-                    following = clean_num(match.group(2))
-                    posts = clean_num(match.group(3))
-                else:
-                    fol_match = re.search(r'([0-9.,KMB]+)\s*(?:followers|Followers)', html)
-                    fng_match = re.search(r'([0-9.,KMB]+)\s*(?:following|Following)', html)
-                    pst_match = re.search(r'([0-9.,KMB]+)\s*(?:posts|Posts|posts_count)', html)
-                    if fol_match: followers = clean_num(fol_match.group(1))
-                    if fng_match: following = clean_num(fng_match.group(1))
-                    if pst_match: posts = clean_num(pst_match.group(1))
-                
-                owner_id = None
-                owner_match = re.search(r'instapp:owner_id"\s+content="(\d+)"', html)
-                if owner_match:
-                    owner_id = int(owner_match.group(1))
-                else:
-                    owner_match2 = re.search(r'instagram://user\?username=[\w.]*&amp;id=(\d+)', html)
-                    if owner_match2:
-                        owner_id = int(owner_match2.group(1))
-                    else:
-                        ids = re.findall(r'"owner_id":"(\d+)"', html)
-                        if ids:
-                            owner_id = int(ids[0])
-                        else:
-                            ids2 = re.findall(r'"id":"(\d+)"', html)
-                            if ids2:
-                                for oid in ids2:
-                                    if 5 < len(oid) < 15:
-                                        owner_id = int(oid)
-                                        break
-                                        
-                account_age = 3.5
-                if owner_id:
-                    if owner_id > 100000000000:    account_age = 0.5
-                    elif owner_id > 90000000000:   account_age = 1.0
-                    elif owner_id > 78000000000:   account_age = 2.0
-                    elif owner_id > 65000000000:   account_age = 3.0
-                    elif owner_id > 52000000000:   account_age = 4.0
-                    elif owner_id > 38000000000:   account_age = 5.0
-                    elif owner_id > 25000000000:   account_age = 6.0
-                    elif owner_id > 15000000000:   account_age = 7.0
-                    elif owner_id > 8000000000:    account_age = 8.0
-                    elif owner_id > 2000000000:    account_age = 9.5
-                    elif owner_id > 500000000:     account_age = 12.0
-                    else:                          account_age = 14.5
-                
-                if followers > 0 or following > 0 or posts > 0:
+            status_logs.append("Routing Instagram query via upgraded scrape_live_instagram module...")
+            try:
+                from scrape_live_instagram import get_instagram_metrics
+                res = get_instagram_metrics(clean_username)
+                if res and res.get('status') == 'success':
                     scraped_data = {
-                        'followers': followers,
-                        'following': following,
-                        'posts': posts,
-                        'account_age': account_age,
-                        'bio': "Parsed from Googlebot live page stream"
+                        'followers': res['followers'],
+                        'following': res['following'],
+                        'posts': res['posts'],
+                        'account_age': res.get('account_age', 3.5),
+                        'profile_pic_url': res.get('profile_pic_url'),
+                        'has_profile_pic': res.get('has_profile_pic', True),
+                        'bio': res.get('biography', "Parsed via Instagram API gateway")
                     }
-                    status_logs.append("Metrics successfully retrieved using Googlebot indexer bypass!")
+                    status_logs.append(f"Successfully retrieved exact metrics via Instagram API gateway ({res.get('source', 'api')})!")
+                else:
+                    status_logs.append(f"Scraper returned error: {res.get('message', 'Unknown error') if res else 'No response'}")
+            except Exception as e:
+                status_logs.append(f"Scraper execution failed: {str(e)}")
         
         if not scraped_data:
             req = urllib.request.Request(
