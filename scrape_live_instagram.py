@@ -156,6 +156,7 @@ def _estimate_age(owner_id):
 # ── Public entry point ──────────────────────────────────────────────────────
 def get_instagram_metrics(username):
     username = username.lstrip('@')
+    json_error = None
 
     # Try JSON API first (exact real-time counts)
     try:
@@ -166,7 +167,7 @@ def get_instagram_metrics(username):
             result['account_age'] = _estimate_age(result.get('owner_id'))
             return result
     except Exception as e:
-        pass  # Fall through to HTML scrape
+        json_error = str(e)
 
     # Fallback: Googlebot HTML scrape
     try:
@@ -176,6 +177,7 @@ def get_instagram_metrics(username):
         result['username']    = username
         result['status']      = 'success'
         result['account_age'] = _estimate_age(result.get('owner_id'))
+        result['json_api_error'] = json_error
         return result
     except Exception as e:
         return {'status': 'error', 'message': str(e)}

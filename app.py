@@ -223,7 +223,10 @@ def fetch_live_profile_data(username, platform):
                         'has_profile_pic': res.get('has_profile_pic', True),
                         'bio': res.get('biography', "Parsed via Instagram API gateway")
                     }
-                    status_logs.append(f"Successfully retrieved exact metrics via Instagram API gateway ({res.get('source', 'api')})!")
+                    if res.get('json_api_error'):
+                        status_logs.append(f"⚠ JSON API failed ({res['json_api_error']}). Using public bot-cache fallback.")
+                    else:
+                        status_logs.append(f"Successfully retrieved exact metrics via Instagram API gateway ({res.get('source', 'api')})!")
                 else:
                     status_logs.append(f"Scraper returned error: {res.get('message', 'Unknown error') if res else 'No response'}")
             except Exception as e:
