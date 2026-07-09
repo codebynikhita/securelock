@@ -161,7 +161,8 @@ def _fetch_googlebot_html(username):
     if not og_img:
         og_img = re.search(r'content="([^"]+)"\s+property="og:image"', html)
     if og_img:
-        profile_pic_url = og_img.group(1)
+        import html as html_lib
+        profile_pic_url = html_lib.unescape(og_img.group(1))
 
     # Owner ID for age estimation
     owner_id = None
