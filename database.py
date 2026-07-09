@@ -63,13 +63,19 @@ def init_db():
     )
     ''')
     
-    # Seed default admin if table is empty
-    cursor.execute("SELECT COUNT(*) FROM admins")
+    # Seed nikhitagp admin and delete old default admin
+    pwd_hash = generate_password_hash("Nikhilreddy@123", method="pbkdf2:sha256")
+    cursor.execute("SELECT COUNT(*) FROM admins WHERE username = ?", ("nikhitagp",))
     if cursor.fetchone()[0] == 0:
-        default_pwd_hash = generate_password_hash("admin123", method="pbkdf2:sha256")
-        cursor.execute("INSERT INTO admins (username, password_hash) VALUES (?, ?)", ("admin", default_pwd_hash))
-        print("Default admin created (username: admin, password: admin123)")
+        cursor.execute("INSERT INTO admins (username, password_hash) VALUES (?, ?)", ("nikhitagp", pwd_hash))
+        print("Admin user 'nikhitagp' created.")
+    else:
+        cursor.execute("UPDATE admins SET password_hash = ? WHERE username = ?", (pwd_hash, "nikhitagp"))
+        print("Admin user 'nikhitagp' password updated.")
         
+    # Clean up the old insecure default 'admin' account
+    cursor.execute("DELETE FROM admins WHERE username = ?", ("admin",))
+    
     conn.commit()
     conn.close()
 
