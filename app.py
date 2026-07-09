@@ -236,7 +236,11 @@ def fetch_live_profile_data(username, platform):
             status_logs.append(f"Attempting secure index-agent connection to {url}...")
             req = urllib.request.Request(
                 url, 
-                headers={'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'}
+                headers={
+                    'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+                    'Accept-Language': 'en-US,en;q=0.9',
+                    'Connection': 'close'
+                }
             )
             with urllib.request.urlopen(req, timeout=4.0) as response:
                 status_code = response.getcode()
@@ -247,7 +251,7 @@ def fetch_live_profile_data(username, platform):
                 if "login" in final_url.lower() or "accounts/login" in final_url.lower():
                     status_logs.append("Meta/X Gateway Alert: Access redirected to login wall. Direct public scraping is restricted.")
                 else:
-                    # Extract Profile Picture URL from og:image
+                    # 1. Extract Profile Picture URL from og:image
                     profile_pic_url = None
                     og_img = re.search(r'<meta[^>]*property=["\']og:image["\'][^>]*content=["\']([^"\']+)["\']', body, re.IGNORECASE)
                     if not og_img:
@@ -256,40 +260,69 @@ def fetch_live_profile_data(username, platform):
                         import html as html_lib
                         profile_pic_url = html_lib.unescape(og_img.group(1))
 
+                    # 2. Extract SEO Meta description
+                    desc_content = ""
                     desc_match = re.search(r'<meta[^>]*property=["\']og:description["\'][^>]*content=["\']([^"\']+)["\']', body, re.IGNORECASE)
                     if not desc_match:
                         desc_match = re.search(r'<meta[^>]*content=["\']([^"\']+)["\'][^>]*property=["\']og:description["\']', body, re.IGNORECASE)
-                        
                     if desc_match:
-                        desc_content = desc_match.group(1)
+                        import html as html_lib
+                        desc_content = html_lib.unescape(desc_match.group(1))
                         status_logs.append(f"Parsed public SEO summary metadata: '{desc_content[:80]}...'")
-                        
-                        followers_m = re.search(r'([0-9.,KMB]+)\s*(?:Followers|followers)', desc_content, re.IGNORECASE)
-                        following_m = re.search(r'([0-9.,KMB]+)\s*(?:Following|following)', desc_content, re.IGNORECASE)
-                        posts_m = re.search(r'([0-9.,KMB]+)\s*(?:Posts|posts|Tweets|tweets)', desc_content, re.IGNORECASE)
-                        
-                        def parse_val(val_str):
-                            if not val_str: return 0
-                            val_str = val_str.replace(',', '').strip().upper()
-                            if 'K' in val_str:
-                                return int(float(val_str.replace('K', '')) * 1000)
-                            if 'M' in val_str:
-                                return int(float(val_str.replace('M', '')) * 1000000)
-                            try:
-                                return int(float(val_str))
-                            except:
-                                return 0
-                            
-                        if followers_m or following_m:
-                            scraped_data = {
-                                'followers': parse_val(followers_m.group(1) if followers_m else "0"),
-                                'following': parse_val(following_m.group(1) if following_m else "0"),
-                                'posts': parse_val(posts_m.group(1) if posts_m else "0"),
-                                'profile_pic_url': profile_pic_url,
-                                'has_profile_pic': profile_pic_url is not None,
-                                'bio': desc_content[:150]
-                            }
-                            status_logs.append("Metrics and profile picture successfully scraped from live headers!")
+
+                    # 3. Parse stats intelligently from full HTML body + Meta description fallback
+                    def parse_val(val_str):
+                        if not val_str: return 0
+                        val_str = val_str.replace(',', '').strip().upper()
+                        if 'K' in val_str: return int(float(val_str.replace('K', '')) * 1000)
+                        if 'M' in val_str: return int(float(val_str.replace('M', '')) * 1000000)
+                        if 'B' in val_str: return int(float(val_str.replace('B', '')) * 1000000000)
+                        try: return int(float(val_str))
+                        except: return 0
+
+                    followers = 0
+                    following = 0
+                    posts = 0
+
+                    # Match Followers (or Likes as follower fallback on Facebook pages)
+                    fol_m = re.search(r'([0-9,]+[0-9.,KMB]*)\s*followers', body, re.IGNORECASE)
+                    if not fol_m and desc_content:
+                        fol_m = re.search(r'([0-9,]+[0-9.,KMB]*)\s*followers', desc_content, re.IGNORECASE)
+                    
+                    if fol_m:
+                        followers = parse_val(fol_m.group(1))
+                    else:
+                        # Fallback: check for page likes (common on Facebook)
+                        likes_m = re.search(r'([0-9,]+[0-9.,KMB]*)\s*likes', desc_content, re.IGNORECASE)
+                        if not likes_m:
+                            likes_m = re.search(r'([0-9,]+[0-9.,KMB]*)\s*likes', body, re.IGNORECASE)
+                        if likes_m:
+                            followers = parse_val(likes_m.group(1))
+
+                    # Match Following (or Connections on LinkedIn)
+                    fng_m = re.search(r'([0-9,]+[0-9.,KMB]*)\s*(?:following|connections)', body, re.IGNORECASE)
+                    if not fng_m and desc_content:
+                        fng_m = re.search(r'([0-9,]+[0-9.,KMB]*)\s*(?:following|connections)', desc_content, re.IGNORECASE)
+                    if fng_m:
+                        following = parse_val(fng_m.group(1))
+
+                    # Match Posts (or Tweets)
+                    pst_m = re.search(r'([0-9,]+[0-9.,KMB]*)\s*(?:posts|tweets)', body, re.IGNORECASE)
+                    if not pst_m and desc_content:
+                        pst_m = re.search(r'([0-9,]+[0-9.,KMB]*)\s*(?:posts|tweets)', desc_content, re.IGNORECASE)
+                    if pst_m:
+                        posts = parse_val(pst_m.group(1))
+
+                    if followers > 0 or following > 0 or posts > 0 or profile_pic_url:
+                        scraped_data = {
+                            'followers': followers,
+                            'following': following,
+                            'posts': posts,
+                            'profile_pic_url': profile_pic_url,
+                            'has_profile_pic': profile_pic_url is not None,
+                            'bio': desc_content[:150] if desc_content else f"Scraped from live {platform} index search"
+                        }
+                        status_logs.append("Metrics and profile picture successfully scraped from live headers!")
     except urllib.error.HTTPError as e:
         status_logs.append(f"Direct connection blocked by firewall: HTTP {e.code} ({e.reason})")
     except Exception as e:
