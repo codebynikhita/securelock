@@ -422,23 +422,16 @@ def detect():
         source = "manual"
         status_logs.append("User overridden metrics submitted. Re-analyzing profile...")
     else:
-        # Check exact match in memory
         account_data = None
         source = "database"
-        
-        if df_accounts is not None:
-            # Case insensitive match
-            match = df_accounts[(df_accounts['username'].str.lower() == username.lower()) & (df_accounts['platform'] == platform)]
-            if len(match) > 0:
-                account_data = match.iloc[0].to_dict()
-                status_logs.append("Query matched local database profile cache.")
-                source = "database"
-                
-        if not account_data:
-            # Attempt live scrape
+
+        # ── For Instagram: ALWAYS scrape live first ──────────────────────────
+        # The CSV contains synthetic training data. An account in the CSV may
+        # not actually exist on Instagram. Scraping confirms real existence.
+        if platform == 'instagram':
             scraped_data, scrape_logs = fetch_live_profile_data(username, platform)
             status_logs.extend(scrape_logs)
-            
+
             if scraped_data:
                 account_data = {
                     'username': username,
@@ -446,7 +439,7 @@ def detect():
                     'platform': platform,
                     'network_count': scraped_data['followers'],
                     'following_count': scraped_data['following'],
-                    'posts_count': scraped_data['posts'] if (scraped_data['posts'] > 0 or "Googlebot" in scraped_data.get('bio', '')) else 125,
+                    'posts_count': scraped_data['posts'] if scraped_data['posts'] > 0 else 125,
                     'account_age': scraped_data.get('account_age', 3.5),
                     'profile_picture': 1 if scraped_data.get('has_profile_pic', True) else 0,
                     'profile_pic_url': scraped_data.get('profile_pic_url', None),
@@ -459,15 +452,45 @@ def detect():
                     'avg_distance': 0.5
                 }
                 source = "live_scrape"
+                # Supplement with CSV labels if available
+                if df_accounts is not None:
+                    csv_match = df_accounts[
+                        (df_accounts['username'].str.lower() == username.lower()) &
+                        (df_accounts['platform'] == platform)
+                    ]
+                    if len(csv_match) > 0:
+                        row = csv_match.iloc[0].to_dict()
+                        account_data['is_fake']  = row.get('is_fake', 0)
+                        account_data['is_clone'] = row.get('is_clone', 0)
+                        account_data['content_similarity'] = row.get('content_similarity', 0.1)
+                        status_logs.append("Live data supplemented with labelled dataset signals.")
             else:
-                # Account not found on any platform — never estimate, always show clear error
-                platform_name = platform.capitalize()
+                # Account doesn't exist on Instagram — reject regardless of CSV
                 return render_template('index.html',
-                    error=f"❌ @{username} could not be found on {platform_name}. The account may not exist, may be private, or may have been deleted. Please verify the username and try again.",
+                    error=f"❌ @{username} could not be found on Instagram. The account may not exist, may be private, or may have been deleted.",
                     db_stats=db_stats,
                     suggestions=suggestions
                 )
-        
+
+        # ── For other platforms: use CSV cache ───────────────────────────────
+        else:
+            if df_accounts is not None:
+                match = df_accounts[
+                    (df_accounts['username'].str.lower() == username.lower()) &
+                    (df_accounts['platform'] == platform)
+                ]
+                if len(match) > 0:
+                    account_data = match.iloc[0].to_dict()
+                    status_logs.append("Query matched local database profile cache.")
+                    source = "database"
+
+            if not account_data:
+                return render_template('index.html',
+                    error=f"❌ @{username} could not be found on {platform.capitalize()}. Please verify the username and platform.",
+                    db_stats=db_stats,
+                    suggestions=suggestions
+                )
+
     # Run prediction pipeline
     result = model_engine.detect(account_data, db_profiles_list)
     
