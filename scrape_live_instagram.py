@@ -12,22 +12,34 @@ def _fetch_json_api(username):
     Returns exact real-time follower/following/post counts — not cached.
     No login required, just the right headers.
     """
-    url = f'https://i.instagram.com/api/v1/users/web_profile_info/?username={username}'
-    headers = {
-        'User-Agent': (
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
-            'AppleWebKit/537.36 (KHTML, like Gecko) '
-            'Chrome/125.0.0.0 Safari/537.36'
-        ),
-        'x-ig-app-id': '936619743392459',
-        'Accept': '*/*',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Referer': 'https://www.instagram.com/',
-        'Origin': 'https://www.instagram.com',
-    }
-    req = urllib.request.Request(url, headers=headers)
-    with urllib.request.urlopen(req, timeout=8.0) as r:
-        data = json.loads(r.read().decode('utf-8'))
+    hosts = ['www.instagram.com', 'i.instagram.com']
+    last_err = None
+    data = None
+
+    for host in hosts:
+        url = f'https://{host}/api/v1/users/web_profile_info/?username={username}'
+        headers = {
+            'User-Agent': (
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                'AppleWebKit/537.36 (KHTML, like Gecko) '
+                'Chrome/125.0.0.0 Safari/537.36'
+            ),
+            'x-ig-app-id': '936619743392459',
+            'Accept': '*/*',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Referer': 'https://www.instagram.com/',
+            'Origin': 'https://www.instagram.com',
+        }
+        try:
+            req = urllib.request.Request(url, headers=headers)
+            with urllib.request.urlopen(req, timeout=6.0) as r:
+                data = json.loads(r.read().decode('utf-8'))
+                break
+        except Exception as e:
+            last_err = e
+
+    if data is None:
+        raise last_err if last_err else Exception("Failed to query Instagram JSON endpoints")
 
     user = data['data']['user']
     if not user:
