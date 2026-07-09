@@ -500,6 +500,7 @@ simple_table(doc,
         ['SQLite single-writer',            'No concurrent write support at scale', 'File-based DB limitation'],
         ['No admin authentication',         'Admin dashboard is publicly accessible', 'Not built for public-facing admin use'],
         ['Static training data',            'Won\'t detect new bot patterns post-2026', 'Requires periodic retraining pipeline'],
+        ['Instagram bot-scraped counts lag (±5%)', 'Raw metrics occasionally vary slightly from real-time app counts (e.g., 1,135 vs 1,078)', 'Instagram serves cached page counts to search crawlers (HTML fallback) and blocks direct real-time JSON API requests from cloud hosting IPs (Render) with HTTP 429 blocks. Resolved via UI manual override inputs.'],
     ],
     col_widths=[Inches(2.2), Inches(2.0), Inches(2.3)],
     header_bg='CC0000'
