@@ -284,34 +284,60 @@ def fetch_live_profile_data(username, platform):
                     following = 0
                     posts = 0
 
-                    # Match Followers (or Likes as follower fallback on Facebook pages)
-                    fol_m = re.search(r'([0-9,]+[0-9.,KMB]*)\s*followers', body, re.IGNORECASE)
-                    if not fol_m and desc_content:
-                        fol_m = re.search(r'([0-9,]+[0-9.,KMB]*)\s*followers', desc_content, re.IGNORECASE)
-                    
-                    if fol_m:
-                        followers = parse_val(fol_m.group(1))
-                    else:
-                        # Fallback: check for page likes (common on Facebook)
-                        likes_m = re.search(r'([0-9,]+[0-9.,KMB]*)\s*likes', desc_content, re.IGNORECASE)
-                        if not likes_m:
-                            likes_m = re.search(r'([0-9,]+[0-9.,KMB]*)\s*likes', body, re.IGNORECASE)
-                        if likes_m:
-                            followers = parse_val(likes_m.group(1))
 
-                    # Match Following (or Connections on LinkedIn)
-                    fng_m = re.search(r'([0-9,]+[0-9.,KMB]*)\s*(?:following|connections)', body, re.IGNORECASE)
-                    if not fng_m and desc_content:
-                        fng_m = re.search(r'([0-9,]+[0-9.,KMB]*)\s*(?:following|connections)', desc_content, re.IGNORECASE)
-                    if fng_m:
-                        following = parse_val(fng_m.group(1))
 
-                    # Match Posts (or Tweets)
-                    pst_m = re.search(r'([0-9,]+[0-9.,KMB]*)\s*(?:posts|tweets)', body, re.IGNORECASE)
-                    if not pst_m and desc_content:
-                        pst_m = re.search(r'([0-9,]+[0-9.,KMB]*)\s*(?:posts|tweets)', desc_content, re.IGNORECASE)
-                    if pst_m:
-                        posts = parse_val(pst_m.group(1))
+                    # Match Followers / Likes
+                    for line in body.splitlines():
+                        if 'followers' in line.lower() and len(line) < 1000:
+                            fol_m = re.search(r'(\d[\d,.]*(?:\s*[KMB])?)\s*followers', line, re.IGNORECASE)
+                            if fol_m:
+                                followers = parse_val(fol_m.group(1))
+                                break
+
+                    if followers == 0 and desc_content and 'followers' in desc_content.lower():
+                        fol_m = re.search(r'(\d[\d,.]*(?:\s*[KMB])?)\s*followers', desc_content, re.IGNORECASE)
+                        if fol_m:
+                            followers = parse_val(fol_m.group(1))
+
+                    if followers == 0:
+                        if desc_content and 'likes' in desc_content.lower():
+                            likes_m = re.search(r'(\d[\d,.]*(?:\s*[KMB])?)\s*likes', desc_content, re.IGNORECASE)
+                            if likes_m:
+                                followers = parse_val(likes_m.group(1))
+                        
+                        if followers == 0 and 'likes' in body.lower():
+                            for line in body.splitlines():
+                                if 'likes' in line.lower() and len(line) < 1000:
+                                    likes_m = re.search(r'(\d[\d,.]*(?:\s*[KMB])?)\s*likes', line, re.IGNORECASE)
+                                    if likes_m:
+                                        followers = parse_val(likes_m.group(1))
+                                        break
+
+                    # Match Following / Connections
+                    for line in body.splitlines():
+                        if any(k in line.lower() for k in ('following', 'connections')) and len(line) < 1000:
+                            fng_m = re.search(r'(\d[\d,.]*(?:\s*[KMB])?)\s*(?:following|connections)', line, re.IGNORECASE)
+                            if fng_m:
+                                following = parse_val(fng_m.group(1))
+                                break
+                                
+                    if following == 0 and desc_content and any(k in desc_content.lower() for k in ('following', 'connections')):
+                        fng_m = re.search(r'(\d[\d,.]*(?:\s*[KMB])?)\s*(?:following|connections)', desc_content, re.IGNORECASE)
+                        if fng_m:
+                            following = parse_val(fng_m.group(1))
+
+                    # Match Posts
+                    for line in body.splitlines():
+                        if any(k in line.lower() for k in ('posts', 'tweets')) and len(line) < 1000:
+                            pst_m = re.search(r'(\d[\d,.]*(?:\s*[KMB])?)\s*(?:posts|tweets)', line, re.IGNORECASE)
+                            if pst_m:
+                                posts = parse_val(pst_m.group(1))
+                                break
+                                
+                    if posts == 0 and desc_content and any(k in desc_content.lower() for k in ('posts', 'tweets')):
+                        pst_m = re.search(r'(\d[\d,.]*(?:\s*[KMB])?)\s*(?:posts|tweets)', desc_content, re.IGNORECASE)
+                        if pst_m:
+                            posts = parse_val(pst_m.group(1))
 
                     if followers > 0 or following > 0 or posts > 0 or profile_pic_url:
                         scraped_data = {
