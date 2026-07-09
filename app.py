@@ -459,13 +459,13 @@ def detect():
                 }
                 source = "live_scrape"
             else:
-                    # Account not found on any platform — never estimate, always show clear error
-                    platform_name = platform.capitalize()
-                    return render_template('index.html',
-                        error=f"❌ @{username} could not be found on {platform_name}. The account may not exist, may be private, or may have been deleted. Please verify the username and try again.",
-                        db_stats=db_stats,
-                        suggestions=suggestions
-                    )
+                # Account not found on any platform — never estimate, always show clear error
+                platform_name = platform.capitalize()
+                return render_template('index.html',
+                    error=f"❌ @{username} could not be found on {platform_name}. The account may not exist, may be private, or may have been deleted. Please verify the username and try again.",
+                    db_stats=db_stats,
+                    suggestions=suggestions
+                )
         
     # Run prediction pipeline
     result = model_engine.detect(account_data, db_profiles_list)
