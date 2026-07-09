@@ -133,12 +133,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Terminal widget live log simulation
-    const terminalContent = document.getElementById('terminal-content');
+    // Terminal widget live log simulation & tab switching
+    const terminalContent = document.getElementById('console-tab-terminal');
     if (terminalContent) {
         const logs = [
             { text: "[INFO] Initializing SECURELOCK Core Engine v4.2...", type: "info" },
-            { text: "[LOAD] Loading XGBoost Precision Impersonation classifier...", type: "info" },
             { text: "[LOAD] Loading Random Forest High-Recall Ensemble voting node...", type: "info" },
             { text: "[LOAD] Loading K-Nearest Neighbors 2D spatial anomaly mapper...", type: "info" },
             { text: "[SCAN] Social integrity network thread bypass ready.", type: "success" },
@@ -147,6 +146,8 @@ document.addEventListener('DOMContentLoaded', () => {
             { text: "[ALERT] Impersonation anomaly caught in database matching: ID 895737", type: "error" },
             { text: "[ACTION] Logging metrics signature to SQLITE logs...", type: "success" },
             { text: "[SCAN] Instagram Googlebot query bypass: Active.", type: "info" },
+            { text: "[SCAN] Facebook scraping cookie and language tunnels: Active.", type: "success" },
+            { text: "[SCAN] LinkedIn HTML line-by-line body scanner: Ready.", type: "success" },
             { text: "[SUCCESS] Integrity defense shielding active on all ports.", type: "success" }
         ];
 
@@ -177,4 +178,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         addLog();
     }
+
+    // Global Console Tab Switching Handler
+    window.switchConsoleTab = function(tabName) {
+        const tabs = ['terminal', 'audit', 'shield', 'intelligence'];
+        
+        // Update tab visibility
+        tabs.forEach(tab => {
+            const el = document.getElementById(`console-tab-${tab}`);
+            const btn = document.getElementById(`btn-console-${tab}`);
+            if (el && btn) {
+                if (tab === tabName) {
+                    el.classList.remove('hidden');
+                    // Add active button classes
+                    btn.className = "px-2 py-1 rounded bg-primary-fixed/15 text-primary-fixed font-bold border border-primary-fixed/25 transition-all uppercase tracking-wider flex items-center gap-1";
+                } else {
+                    el.classList.add('hidden');
+                    // Add inactive button classes
+                    btn.className = "px-2 py-1 rounded text-on-surface-variant/75 hover:bg-white/5 transition-all uppercase tracking-wider flex items-center gap-1";
+                }
+            }
+        });
+    };
 });

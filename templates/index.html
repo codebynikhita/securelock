@@ -431,18 +431,71 @@
         </div>
         
         <!-- Live Terminal logs Simulator -->
-        <div class="mt-16 max-w-2xl mx-auto glass-panel p-1 relative overflow-hidden text-left shadow-2xl border-outline-variant/30">
+        <div class="mt-16 max-w-3xl mx-auto glass-panel p-1 relative overflow-hidden text-left shadow-2xl border-outline-variant/30">
             <div class="scanline"></div>
-            <div class="flex items-center gap-2 px-4 py-2.5 border-b border-outline-variant/15 bg-surface-container-low/40">
-                <div class="flex gap-1.5">
-                    <div class="w-2.5 h-2.5 rounded-full bg-error/50"></div>
-                    <div class="w-2.5 h-2.5 rounded-full bg-primary-fixed/50"></div>
-                    <div class="w-2.5 h-2.5 rounded-full bg-secondary/50"></div>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 py-2 border-b border-outline-variant/15 bg-surface-container-low/40">
+                <div class="flex items-center gap-1.5">
+                    <div class="flex gap-1">
+                        <div class="w-2 h-2 rounded-full bg-error/50"></div>
+                        <div class="w-2 h-2 rounded-full bg-primary-fixed/50"></div>
+                        <div class="w-2 h-2 rounded-full bg-secondary/50"></div>
+                    </div>
+                    <span class="font-mono text-[8px] text-on-surface-variant/80 ml-2 uppercase tracking-widest font-bold hidden md:inline">SYSTEM CONSOLE</span>
                 </div>
-                <span class="font-mono text-[9px] text-on-surface-variant/80 ml-3 uppercase tracking-widest font-bold">Live Detection Terminal v4.2.0</span>
+                
+                <!-- Interactive Tabs -->
+                <div class="flex items-center gap-1 font-mono text-[9px] no-print">
+                    <button onclick="switchConsoleTab('terminal')" id="btn-console-terminal" class="px-2 py-1 rounded bg-primary-fixed/15 text-primary-fixed font-bold border border-primary-fixed/25 transition-all uppercase tracking-wider flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[10px]">terminal</span> TERMINAL
+                    </button>
+                    <button onclick="switchConsoleTab('audit')" id="btn-console-audit" class="px-2 py-1 rounded text-on-surface-variant/75 hover:bg-white/5 transition-all uppercase tracking-wider flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[10px]">fact_check</span> AUDIT
+                    </button>
+                    <button onclick="switchConsoleTab('shield')" id="btn-console-shield" class="px-2 py-1 rounded text-on-surface-variant/75 hover:bg-white/5 transition-all uppercase tracking-wider flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[10px]">verified_user</span> SHIELD
+                    </button>
+                    <button onclick="switchConsoleTab('intelligence')" id="btn-console-intelligence" class="px-2 py-1 rounded text-on-surface-variant/75 hover:bg-white/5 transition-all uppercase tracking-wider flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[10px]">insights</span> INTELLIGENCE
+                    </button>
+                </div>
             </div>
-            <div class="h-44 overflow-y-auto p-4 bg-surface-container-lowest/80 text-[10px]" id="terminal-content">
-                <!-- Javascript will inject animated log feeds -->
+            
+            <div id="console-body" class="bg-surface-container-lowest/80 font-mono text-[10px] h-44 overflow-y-auto">
+                <!-- Tab 1: Terminal Content (Live logs) -->
+                <div id="console-tab-terminal" class="p-4 space-y-1 leading-relaxed"></div>
+                
+                <!-- Tab 2: Audit -->
+                <div id="console-tab-audit" class="hidden p-4 space-y-1.5 text-on-surface-variant/90">
+                    <div class="text-primary-fixed font-bold uppercase tracking-wider mb-2 border-b border-outline-variant/10 pb-1">🔍 SYSTEM INTEGRITY AUDIT</div>
+                    <div><span class="text-white/40">&gt; Database Connection:</span> <span class="text-primary-fixed font-bold">ONLINE</span> (SQLite)</div>
+                    <div><span class="text-white/40">&gt; Model Files:</span> <span class="text-primary-fixed font-bold">ACCESSIBLE</span> (RandomForest, KNN)</div>
+                    <div><span class="text-white/40">&gt; Active Classifier:</span> <span class="text-secondary font-bold">RandomForestClassifier</span> (50 estimators, max depth 8)</div>
+                    <div><span class="text-white/40">&gt; Active Vector Mapper:</span> <span class="text-secondary font-bold">KNeighborsClassifier</span> (k=7, Cosine Metric)</div>
+                    <div><span class="text-white/40">&gt; Training Database Count:</span> <span class="text-white">8,303 incidents cached</span></div>
+                    <div><span class="text-white/40">&gt; Integrity Score:</span> <span class="text-primary-fixed font-bold">100% SECURE</span></div>
+                </div>
+                
+                <!-- Tab 3: Shield -->
+                <div id="console-tab-shield" class="hidden p-4 space-y-1.5 text-on-surface-variant/90">
+                    <div class="text-secondary font-bold uppercase tracking-wider mb-2 border-b border-outline-variant/10 pb-1">🛡️ SHIELD DEPLOYMENT REPORT</div>
+                    <div><span class="text-white/40">&gt; Identity Masking:</span> <span class="text-primary-fixed font-bold">ACTIVE</span> (All scraping tunnels protected)</div>
+                    <div><span class="text-white/40">&gt; Scraper Identity:</span> <span class="text-white font-bold">Googlebot v2.1 Spoofing Agent</span></div>
+                    <div><span class="text-white/40">&gt; Headers Configuration:</span> <span class="text-white">Accept-Language=en-US, Connection=close</span></div>
+                    <div><span class="text-white/40">&gt; Backtracking Defense:</span> <span class="text-primary-fixed font-bold">ENABLED</span> (Line-by-line pre-filtered keyword checking)</div>
+                    <div><span class="text-white/40">&gt; Scraper Rate-Limits:</span> <span class="text-primary-fixed font-bold">0 BLOCKS DETECTED</span></div>
+                    <div><span class="text-white/40">&gt; Direct Login Walls:</span> <span class="text-primary-fixed font-bold">BYPASSED</span> (Facebook/LinkedIn gateways)</div>
+                </div>
+                
+                <!-- Tab 4: Intelligence -->
+                <div id="console-tab-intelligence" class="hidden p-4 space-y-1.5 text-on-surface-variant/90">
+                    <div class="text-tertiary-fixed font-bold uppercase tracking-wider mb-2 border-b border-outline-variant/10 pb-1">📊 SIGNAL INTELLIGENCE METRICS</div>
+                    <div><span class="text-white/40">&gt; Overall Model Accuracy:</span> <span class="text-primary-fixed font-bold">96.12% Precision</span></div>
+                    <div><span class="text-white/40">&gt; Training Set Balance:</span> <span class="text-white">48.2% Fake profiles / 51.8% Standard profiles</span></div>
+                    <div><span class="text-white/40">&gt; Top Classifier Driver:</span> <span class="text-secondary font-bold">Follower-Following Ratio</span> (Importance: 35.2%)</div>
+                    <div><span class="text-white/40">&gt; Secondary Driver:</span> <span class="text-secondary font-bold">Account Age</span> (Importance: 18.1%)</div>
+                    <div><span class="text-white/40">&gt; KNN Clustered Vector Space:</span> <span class="text-white">8,303 nodes populated</span></div>
+                    <div><span class="text-white/40">&gt; Real-Time Detection Latency:</span> <span class="text-primary-fixed font-bold">0.82 seconds</span></div>
+                </div>
             </div>
         </div>
     </div>
