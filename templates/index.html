@@ -75,8 +75,38 @@
                 </div>
             </div>
 
-            <!-- Username and details -->
-            <div class="text-center w-full border-t border-b border-outline-variant/10 py-4">
+            <!-- Profile Picture + Username -->
+            <div class="text-center w-full border-t border-b border-outline-variant/10 py-4 flex flex-col items-center gap-2">
+
+                <!-- Profile Picture -->
+                {% if report.profile_pic_url %}
+                    <div class="relative">
+                        <img src="{{ report.profile_pic_url }}"
+                             alt="@{{ report.username }}"
+                             class="w-16 h-16 rounded-full object-cover border-2 border-primary-fixed/40 shadow-lg"
+                             onerror="this.style.display='none'; document.getElementById('pic-fallback-{{ report.username }}').style.display='flex';">
+                        <div id="pic-fallback-{{ report.username }}"
+                             class="w-16 h-16 rounded-full bg-surface-container border-2 border-outline-variant/30 items-center justify-center hidden">
+                            <span class="material-symbols-outlined text-2xl text-on-surface-variant">account_circle</span>
+                        </div>
+                        <span class="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-primary-fixed border-2 border-surface" title="Profile photo found"></span>
+                    </div>
+                {% elif report.profile_picture == 0 %}
+                    <!-- No profile picture — strong fake signal -->
+                    <div class="relative">
+                        <div class="w-16 h-16 rounded-full bg-error/10 border-2 border-error/40 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-2xl text-error">no_photography</span>
+                        </div>
+                        <span class="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-error border-2 border-surface" title="No profile photo — risk indicator"></span>
+                    </div>
+                    <div class="text-[9px] text-error font-mono tracking-widest">NO PROFILE PHOTO DETECTED</div>
+                {% else %}
+                    <!-- Database account — no URL available -->
+                    <div class="w-16 h-16 rounded-full bg-surface-container border-2 border-outline-variant/20 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-2xl text-on-surface-variant">account_circle</span>
+                    </div>
+                {% endif %}
+
                 <h2 class="font-mono text-xl font-bold text-white tracking-tight break-all">@{{ report.username }}</h2>
                 <div class="text-[10px] text-on-surface-variant/60 font-mono tracking-widest uppercase mt-1">PROFILED ID :: SOCIAL_NODE_{{ report.username | length * 73 }}</div>
             </div>

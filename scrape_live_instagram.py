@@ -53,13 +53,27 @@ def get_instagram_metrics(username):
             if fng_match: following = clean_num(fng_match.group(1))
             if pst_match: posts = clean_num(pst_match.group(1))
             
+        # Extract Profile Picture URL
+        profile_pic_url = None
+        # Try og:image meta tag (most reliable)
+        og_img = re.search(r'property="og:image"\s+content="([^"]+)"', html)
+        if not og_img:
+            og_img = re.search(r'content="([^"]+)"\s+property="og:image"', html)
+        if og_img:
+            profile_pic_url = og_img.group(1)
+        # Fallback: look for profile_pic_url in embedded JSON
+        if not profile_pic_url:
+            pic_match = re.search(r'"profile_pic_url":"([^"]+)"', html)
+            if pic_match:
+                profile_pic_url = pic_match.group(1).replace('\\u0026', '&')
+
         # Extract Owner ID / User ID
         owner_id = None
         owner_match = re.search(r'instapp:owner_id"\s+content="(\d+)"', html)
         if owner_match:
             owner_id = int(owner_match.group(1))
         else:
-            owner_match2 = re.search(r'instagram://user\?username=[\w.]*&amp;id=(\d+)', html)
+            owner_match2 = re.search(r'instagram://user\?username=[\w.]*\&amp;id=(\d+)', html)
             if owner_match2:
                 owner_id = int(owner_match2.group(1))
             else:
@@ -97,7 +111,9 @@ def get_instagram_metrics(username):
             'following': following,
             'posts': posts,
             'account_age': account_age,
-            'owner_id': owner_id
+            'owner_id': owner_id,
+            'profile_pic_url': profile_pic_url,
+            'has_profile_pic': profile_pic_url is not None
         }
     except Exception as e:
         return {
