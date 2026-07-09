@@ -439,7 +439,7 @@ def detect():
                     'platform': platform,
                     'network_count': scraped_data['followers'],
                     'following_count': scraped_data['following'],
-                    'posts_count': scraped_data['posts'] if scraped_data['posts'] > 0 else 125,
+                    'posts_count': scraped_data['posts'],
                     'account_age': scraped_data.get('account_age', 3.5),
                     'profile_picture': 1 if scraped_data.get('has_profile_pic', True) else 0,
                     'profile_pic_url': scraped_data.get('profile_pic_url', None),
