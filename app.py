@@ -459,20 +459,13 @@ def detect():
                 }
                 source = "live_scrape"
             else:
-                # For non-Instagram platforms, don't estimate — show error
-                if platform != 'instagram':
+                    # Account not found on any platform — never estimate, always show clear error
+                    platform_name = platform.capitalize()
                     return render_template('index.html',
-                        error=f"❌ @{username} was not found on {platform.capitalize()}. Please make sure you selected the correct platform and the username exists.",
+                        error=f"❌ @{username} could not be found on {platform_name}. The account may not exist, may be private, or may have been deleted. Please verify the username and try again.",
                         db_stats=db_stats,
                         suggestions=suggestions
                     )
-                # For Instagram, estimate as last resort
-                account_data = estimate_features_from_username(username, platform)
-                account_data['username'] = username
-                account_data['display_name'] = username
-                account_data['platform'] = platform
-                source = "estimation"
-                status_logs.append("Dynamic profile pattern estimator activated.")
         
     # Run prediction pipeline
     result = model_engine.detect(account_data, db_profiles_list)
