@@ -215,8 +215,8 @@ print("✅ chart_architecture.png")
 # ══════════════════════════════════════════════════════════════════════════════
 # 5. DEPLOYMENT PROBLEMS TIMELINE
 # ══════════════════════════════════════════════════════════════════════════════
-fig, ax = plt.subplots(figsize=(10, 5), facecolor=BG)
-ax.set_xlim(-0.5, 6.5); ax.set_ylim(-0.5, 5.5)
+fig, ax = plt.subplots(figsize=(11, 5), facecolor=BG)
+ax.set_xlim(-0.5, 7.5); ax.set_ylim(-0.5, 5.5)
 ax.axis('off')
 
 problems = [
@@ -226,18 +226,19 @@ problems = [
     ('OOM — Runtime\nLoop',    '8303× DataFrame\ncreation per request',     PURPLE),
     ('Template\nCrash',        'Missing key in\nresult dict',               RED),
     ('.gitignore\nConflicts',  'Duplicate exclude/\ninclude rules',         PURPLE),
-    ('✅ LIVE',                 'Pre-trained models\ncommitted to git',      LIME),
+    ('Instagram\nCache Lag',   'HTML page metrics\ncached / stale (429)',    RED),
+    ('✅ LIVE',                 'Exact override UI\nfields re-enabled',      LIME),
 ]
 for i, (title, desc, col) in enumerate(problems):
     x = i
     ax.plot(x, 2.5, 'o', color=col, markersize=18, zorder=3)
-    ax.text(x, 2.5, str(i+1) if i < 6 else '✓',
+    ax.text(x, 2.5, str(i+1) if i < 7 else '✓',
             ha='center', va='center', fontsize=8, color=BG, fontweight='bold')
     ax.text(x, 3.5, title, ha='center', va='bottom', fontsize=7.5,
             color=col, fontweight='bold', fontfamily='monospace')
     ax.text(x, 1.5, desc, ha='center', va='top', fontsize=6.5,
             color=WHITE, fontfamily='monospace')
-    if i < 6:
+    if i < 7:
         ax.annotate('', xy=(i+0.82, 2.5), xytext=(i+0.18, 2.5),
                     arrowprops=dict(arrowstyle='->', color='#444933', lw=1.5))
 

@@ -461,6 +461,14 @@ challenges = [
         'Rewrote .gitignore from scratch. Final strategy: commit pre-trained models directly '
         'to git, no complex negation rules needed.'
     ),
+    (
+        '8.7 Instagram Bot-Scraped Counts Lag (±5% Caching Discrepancy)',
+        'Instagram serves cached page counts to search crawlers (like Googlebot) to optimize server performance. '
+        'Additionally, Instagram blocks direct real-time API requests from cloud IPs (Render) with HTTP 429 Too Many Requests blocks. '
+        'This caused the scraped follower/following counts to occasionally vary slightly from real-time app counts (e.g. showing 234 instead of 230).',
+        'Upgraded the frontend results UI to restore fully interactive input fields and added a clear warning disclaimer (±5% warning) beside the stats. '
+        'This allows users to easily correct the values (e.g. typing 230 instead of 234) and click "RE-ANALYZE PROFILE" to re-calculate the ensemble ML prediction on 100% exact metrics.'
+    ),
 ]
 
 for title, problem, solution in challenges:
