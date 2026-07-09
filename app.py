@@ -532,14 +532,22 @@ def api_version():
 def api_test_scrape():
     username = request.args.get('username', 'nasa')
     platform = request.args.get('platform', 'facebook')
-    data, logs = fetch_live_profile_data(username, platform)
-    return jsonify({
-        "status": "success",
-        "platform": platform,
-        "username": username,
-        "scraped_data": data,
-        "logs": logs
-    })
+    try:
+        data, logs = fetch_live_profile_data(username, platform)
+        return jsonify({
+            "status": "success",
+            "platform": platform,
+            "username": username,
+            "scraped_data": data,
+            "logs": logs
+        })
+    except Exception as e:
+        import traceback
+        return jsonify({
+            "status": "error",
+            "message": str(e),
+            "traceback": traceback.format_exc()
+        }), 200
 
 @app.route('/api/detect', methods=['POST', 'GET'])
 def api_detect():
