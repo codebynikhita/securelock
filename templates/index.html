@@ -175,10 +175,17 @@
                 <input type="hidden" name="platform" value="{{ report.platform }}">
                 <input type="hidden" name="manual_mode" value="true">
                 
-                <div class="flex items-center justify-between border-b border-outline-variant/15 pb-3">
-                    <h3 class="font-mono text-sm font-bold text-white uppercase tracking-wider">BEHAVIORAL DATA ATTRIBUTES</h3>
-                    {% if report.sources and report.sources.followers == 'live' %}
-                    <span class="font-mono text-[9px] text-on-surface-variant/60 uppercase tracking-wider">⚠ scraped via bot — may be ±5% of actual</span>
+                <div class="flex flex-col gap-1 border-b border-outline-variant/15 pb-3">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-mono text-sm font-bold text-white uppercase tracking-wider">BEHAVIORAL DATA ATTRIBUTES</h3>
+                        {% if report.sources and (report.sources.followers == 'live' or report.sources.following == 'live') %}
+                        <span class="font-mono text-[9px] text-primary-fixed/80 bg-primary-fixed/10 px-2 py-0.5 rounded border border-primary-fixed/20 tracking-wider">LIVE DATA</span>
+                        {% endif %}
+                    </div>
+                    {% if report.sources and (report.sources.followers == 'live' or report.sources.following == 'live') %}
+                    <p class="text-[10px] text-on-surface-variant/80 mt-1 leading-relaxed">
+                        <span class="text-primary-fixed">Note:</span> Live counts are highly accurate but may not be exact due to platform caching. You can click any value below to edit and click <strong>RE-ANALYZE PROFILE</strong> to update the scan.
+                    </p>
                     {% endif %}
                 </div>
 
