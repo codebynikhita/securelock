@@ -177,7 +177,9 @@
                 
                 <div class="flex items-center justify-between border-b border-outline-variant/15 pb-3">
                     <h3 class="font-mono text-sm font-bold text-white uppercase tracking-wider">BEHAVIORAL DATA ATTRIBUTES</h3>
-                    <span class="font-mono text-[10px] text-on-surface-variant uppercase no-print">TAP VALUES TO EDIT & OVERRIDE</span>
+                    {% if report.sources and report.sources.followers == 'live' %}
+                    <span class="font-mono text-[9px] text-on-surface-variant/60 uppercase tracking-wider">⚠ scraped via bot — may be ±5% of actual</span>
+                    {% endif %}
                 </div>
 
                 <!-- Parameters grid -->
