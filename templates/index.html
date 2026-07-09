@@ -191,18 +191,13 @@
                         {% else %}
                             <div class="text-[9px] text-secondary font-bold tracking-widest font-mono mb-1 uppercase"><span class="w-1.5 h-1.5 inline-block bg-secondary rounded-full mr-1"></span> ESTIMATED</div>
                         {% endif %}
-                        {% set fc = report.network_count | int %}
-                        {% if fc >= 1000000000 %}
-                            <div class="font-mono text-2xl font-extrabold text-white">{{ '%.1f' | format(fc / 1000000000) }}B</div>
-                        {% elif fc >= 1000000 %}
-                            <div class="font-mono text-2xl font-extrabold text-white">{{ '%.1f' | format(fc / 1000000) }}M</div>
-                        {% elif fc >= 1000 %}
-                            <div class="font-mono text-2xl font-extrabold text-white">{{ '%.1f' | format(fc / 1000) }}K</div>
-                        {% else %}
-                            <div class="font-mono text-2xl font-extrabold text-white">{{ fc }}</div>
-                        {% endif %}
-                        <input type="hidden" name="followers" value="{{ report.network_count }}">
-                        <div class="text-[10px] text-on-surface-variant font-mono uppercase tracking-widest mt-2">Followers</div>
+                        <input type="number" name="followers" value="{{ report.network_count }}" class="w-full bg-transparent border-0 border-b border-dashed border-outline-variant/35 py-1 text-center font-mono text-2xl font-extrabold text-white focus:ring-0 focus:border-primary-fixed outline-none" required>
+                        <div class="text-[10px] text-on-surface-variant font-mono uppercase tracking-widest mt-2 flex items-center justify-center gap-1">
+                            Followers
+                            {% set fc = report.network_count | int %}
+                            <span class="text-primary-fixed/80">({% if fc >= 1000000000 %}{{ '%.1f' | format(fc / 1000000000) }}B{% elif fc >= 1000000 %}{{ '%.1f' | format(fc / 1000000) }}M{% elif fc >= 1000 %}{{ '%.1f' | format(fc / 1000) }}K{% else %}{{ fc }}{% endif %})</span>
+                            <span class="material-symbols-outlined text-[10px] opacity-45 no-print">edit</span>
+                        </div>
                     </div>
                     <!-- Following -->
                     <div class="bg-surface-container-lowest/50 border border-outline-variant/15 p-4 text-center group hover:border-primary-fixed/40 transition-colors">
@@ -211,16 +206,13 @@
                         {% else %}
                             <div class="text-[9px] text-secondary font-bold tracking-widest font-mono mb-1 uppercase"><span class="w-1.5 h-1.5 inline-block bg-secondary rounded-full mr-1"></span> ESTIMATED</div>
                         {% endif %}
-                        {% set fg = report.following_count | int %}
-                        {% if fg >= 1000000 %}
-                            <div class="font-mono text-2xl font-extrabold text-white">{{ '%.1f' | format(fg / 1000000) }}M</div>
-                        {% elif fg >= 1000 %}
-                            <div class="font-mono text-2xl font-extrabold text-white">{{ '%.1f' | format(fg / 1000) }}K</div>
-                        {% else %}
-                            <div class="font-mono text-2xl font-extrabold text-white">{{ fg }}</div>
-                        {% endif %}
-                        <input type="hidden" name="following" value="{{ report.following_count }}">
-                        <div class="text-[10px] text-on-surface-variant font-mono uppercase tracking-widest mt-2">Following</div>
+                        <input type="number" name="following" value="{{ report.following_count }}" class="w-full bg-transparent border-0 border-b border-dashed border-outline-variant/35 py-1 text-center font-mono text-2xl font-extrabold text-white focus:ring-0 focus:border-primary-fixed outline-none" required>
+                        <div class="text-[10px] text-on-surface-variant font-mono uppercase tracking-widest mt-2 flex items-center justify-center gap-1">
+                            Following
+                            {% set fg = report.following_count | int %}
+                            <span class="text-primary-fixed/80">({% if fg >= 1000000 %}{{ '%.1f' | format(fg / 1000000) }}M{% elif fg >= 1000 %}{{ '%.1f' | format(fg / 1000) }}K{% else %}{{ fg }}{% endif %})</span>
+                            <span class="material-symbols-outlined text-[10px] opacity-45 no-print">edit</span>
+                        </div>
                     </div>
                     <!-- Posts -->
                     <div class="bg-surface-container-lowest/50 border border-outline-variant/15 p-4 text-center group hover:border-primary-fixed/40 transition-colors">
@@ -229,16 +221,13 @@
                         {% else %}
                             <div class="text-[9px] text-secondary font-bold tracking-widest font-mono mb-1 uppercase"><span class="w-1.5 h-1.5 inline-block bg-secondary rounded-full mr-1"></span> ESTIMATED</div>
                         {% endif %}
-                        {% set pc = report.posts_count | int %}
-                        {% if pc >= 1000000 %}
-                            <div class="font-mono text-2xl font-extrabold text-white">{{ '%.1f' | format(pc / 1000000) }}M</div>
-                        {% elif pc >= 1000 %}
-                            <div class="font-mono text-2xl font-extrabold text-white">{{ '%.1f' | format(pc / 1000) }}K</div>
-                        {% else %}
-                            <div class="font-mono text-2xl font-extrabold text-white">{{ pc }}</div>
-                        {% endif %}
-                        <input type="hidden" name="posts" value="{{ report.posts_count }}">
-                        <div class="text-[10px] text-on-surface-variant font-mono uppercase tracking-widest mt-2">Posts</div>
+                        <input type="number" name="posts" value="{{ report.posts_count }}" class="w-full bg-transparent border-0 border-b border-dashed border-outline-variant/35 py-1 text-center font-mono text-2xl font-extrabold text-white focus:ring-0 focus:border-primary-fixed outline-none" required>
+                        <div class="text-[10px] text-on-surface-variant font-mono uppercase tracking-widest mt-2 flex items-center justify-center gap-1">
+                            Posts
+                            {% set pc = report.posts_count | int %}
+                            <span class="text-primary-fixed/80">({% if pc >= 1000000 %}{{ '%.1f' | format(pc / 1000000) }}M{% elif pc >= 1000 %}{{ '%.1f' | format(pc / 1000) }}K{% else %}{{ pc }}{% endif %})</span>
+                            <span class="material-symbols-outlined text-[10px] opacity-45 no-print">edit</span>
+                        </div>
                     </div>
                     <!-- Account Age -->
                     <div class="bg-surface-container-lowest/50 border border-outline-variant/15 p-4 text-center group hover:border-primary-fixed/40 transition-colors">
